@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "services": "Services",
+    "price": "Tarifs",
+    "gallery": "Galerie",
+    "reviews": "Avis",
+    "booking": "Réservation",
+    "contacts": "Contact",
+    "menu": "Menu",
+    "book": "Réserver"
+  },
+  "hero": {
+    "location": "KIEV • MÉDECINE ESTHÉTIQUE",
+    "title": "AURA Luxe Clinic",
+    "subtitle": "Soins personnalisés. Résultats subtils. Confiance durable.",
+    "cta_primary": "Réserver une consultation",
+    "cta_secondary": "Explorer les services"
+  },
+  "signature": {
+    "label": "SOINS DE LA PEAU BASÉS SUR LA SCIENCE",
+    "title": "Soins Signature AURA",
+    "description": "Nous combinons la précision clinique avec un œil éditorial pour que chaque traitement vous ressemble, simplement amélioré.",
+    "link": "Rencontrer l'équipe"
+  },
+  "about": {
+    "title": "À propos d'AURA",
+    "description": "Nous sommes une équipe de médecins esthétiques et de thérapeutes certifiés axés sur la santé préventive de la peau. Nos protocoles sont fondés sur des preuves, notre environnement est calme et nos résultats sont conçus pour paraître naturels.",
+    "stats": {
+      "years": "12+ Ans",
+      "clients": "6K+ Clients",
+      "rating": "4.9 Note"
+    },
+    "cta": "Lire notre histoire"
+  },
+  "services": {
+    "title": "Nos Services",
+    "description": "Des premiers soins du visage aux plans esthétiques avancés, nous créons des traitements adaptés à votre emploi du temps, votre sensibilité et vos objectifs.",
+    "list": {
+      "consultation": "Consultation Esthétique",
+      "injectables": "Injectables et Fillers",
+      "laser": "Laser et Appareils Énergétiques",
+      "facials": "Soins Visage Médicalisés"
+    },
+    "cta": "Voir le menu complet"
+  },
+  "treatments": {
+    "title": "Traitements",
+    "description": "Chaque plan commence par une évaluation de la peau. Nous privilégions la sécurité, un temps d'arrêt minimal et des résultats qui s'améliorent avec le temps, pas d'exagération immédiate.",
+    "chips": {
+      "products": "Produits testés",
+      "care": "Kit de soins post-traitement"
+    },
+    "cta": "Voir les protocoles"
+  },
+  "results": {
+    "title": "Résultats",
+    "description": "Les améliorations apparaissent progressivement : meilleure texture, moins de rougeur, teint plus lumineux. Nous photographions les progrès et ajustons les protocoles au fur et à mesure que votre peau évolue.",
+    "metric": "Satisfaction client moyenne : 4.9/5",
+    "cta": "Voir les études de cas"
+  },
+  "team": {
+    "title": "Équipe",
+    "description": "Nos praticiens se forment continuellement : nouvelles techniques, protocoles plus sûrs et un sens raffiné de l'équilibre. Nous écoutons d'abord, puis nous traitons.",
+    "members": {
+      "olena": "Dr Olena K. — Directrice Médicale",
+      "anastasiia": "Anastasiia R. — Esthéticienne Principale",
+      "yulia": "Yulia M. — Thérapeute de la Peau"
+    },
+    "cta": "Rencontrer tout le monde"
+  },
+  "booking": {
+    "title": "Réservation",
+    "description": "Choisissez un service, sélectionnez une heure et arrivez 10 minutes en avance. Nous confirmerons par SMS et enverrons les instructions de préparation.",
+    "contact": "+38 044 000 00 00 • hello@auraclinic.ua",
+    "cta_primary": "Réserver en ligne",
+    "cta_secondary": "Demander un appel"
+  },
+  "gift": {
+    "title": "Carte Cadeau",
+    "description": "Offrez l'expérience d'une belle peau. Choisissez un montant, ajoutez une note et nous nous occupons du reste, emballage élégant inclus.",
+    "badge": "Cartes numériques et physiques disponibles",
+    "cta": "Acheter une carte cadeau"
+  },
+  "reviews": {
+    "title": "Avis",
+    "description": "Nous demandons des retours après chaque cycle de traitements. Voici ce que nos clients disent de l'expérience et des résultats.",
+    "quote": "Ma peau ne s'est jamais sentie aussi calme et claire.",
+    "author": "— Daria T.",
+    "cta": "Lire plus d'avis"
+  },
+  "contact": {
+    "title": "Visiter AURA",
+    "address": "12B Rue Reitarska, Kiev, Ukraine",
+    "hours": {
+      "weekdays": "Lun–Ven: 09:00–20:00",
+      "saturday": "Sam: 10:00–18:00",
+      "sunday": "Dim: Fermé"
+    },
+    "cta": "Obtenir l'itinéraire",
+    "form": {
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "message": "Message",
+      "submit": "Envoyer le message"
+    }
+  },
+  "footer": {
+    "copyright": "© AURA Luxe Clinic. Tous droits réservés.",
+    "privacy": "Confidentialité",
+    "terms": "Conditions"
+  },
+  "floating": {
+    "call": "Appeler",
+    "chat": "Chat",
+    "book": "Réserver",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  }
+}

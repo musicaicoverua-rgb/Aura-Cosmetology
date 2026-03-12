@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "price": "Price",
+    "gallery": "Gallery",
+    "reviews": "Reviews",
+    "booking": "Booking",
+    "contacts": "Contacts",
+    "menu": "Menu",
+    "book": "Book Now"
+  },
+  "hero": {
+    "location": "KYIV • AESTHETIC MEDICINE",
+    "title": "AURA Luxe Clinic",
+    "subtitle": "Personalized care. Subtle results. Lasting confidence.",
+    "cta_primary": "Book a Consultation",
+    "cta_secondary": "Explore Services"
+  },
+  "signature": {
+    "label": "SCIENCE-LED SKINCARE",
+    "title": "Signature AURA Care",
+    "description": "We combine clinical precision with an editorial eye—so every treatment looks like you, only elevated.",
+    "link": "Meet the team"
+  },
+  "about": {
+    "title": "About AURA",
+    "description": "We're a team of aesthetic doctors and certified therapists focused on preventive skin health. Our protocols are evidence-based, our environment is calm, and our results are designed to feel natural.",
+    "stats": {
+      "years": "12+ Years",
+      "clients": "6K+ Clients",
+      "rating": "4.9 Rating"
+    },
+    "cta": "Read our story"
+  },
+  "services": {
+    "title": "Our Services",
+    "description": "From first-time facials to advanced aesthetic plans, we build treatments around your schedule, your sensitivity, and your goals.",
+    "list": {
+      "consultation": "Aesthetic Consultation",
+      "injectables": "Injectables & Fillers",
+      "laser": "Laser & Energy Devices",
+      "facials": "Medical-Grade Facials"
+    },
+    "cta": "View full menu"
+  },
+  "treatments": {
+    "title": "Treatments",
+    "description": "Every plan starts with a skin assessment. We prioritize safety, minimal downtime, and results that improve over time—not overnight exaggeration.",
+    "chips": {
+      "products": "Patch-tested products",
+      "care": "Post-treatment care kit"
+    },
+    "cta": "See protocols"
+  },
+  "results": {
+    "title": "Results",
+    "description": "Improvements appear gradually—better texture, calmer redness, brighter tone. We photograph progress and adjust protocols as your skin evolves.",
+    "metric": "Average client satisfaction: 4.9/5",
+    "cta": "View case studies"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Our practitioners train continuously—new techniques, safer protocols, and a refined sense of balance. We listen first, then treat.",
+    "members": {
+      "olena": "Dr. Olena K. — Medical Director",
+      "anastasiia": "Anastasiia R. — Lead Aesthetician",
+      "yulia": "Yulia M. — Skin Therapist"
+    },
+    "cta": "Meet everyone"
+  },
+  "booking": {
+    "title": "Booking",
+    "description": "Choose a service, pick a time, and arrive 10 minutes early. We'll confirm via SMS and send prep instructions.",
+    "contact": "+38 044 000 00 00 • hello@auraclinic.ua",
+    "cta_primary": "Book online",
+    "cta_secondary": "Request a call"
+  },
+  "gift": {
+    "title": "Gift Card",
+    "description": "Give the experience of great skin. Choose an amount, add a note, and we'll handle the rest—beautiful packaging included.",
+    "badge": "Digital & physical cards available",
+    "cta": "Buy a gift card"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "description": "We ask for feedback after every cycle of treatments. Here's what our clients say about the experience—and the results.",
+    "quote": "My skin has never felt this calm and clear.",
+    "author": "— Daria T.",
+    "cta": "Read more reviews"
+  },
+  "contact": {
+    "title": "Visit AURA",
+    "address": "12B Reitarska St, Kyiv, Ukraine",
+    "hours": {
+      "weekdays": "Mon–Fri: 09:00–20:00",
+      "saturday": "Sat: 10:00–18:00",
+      "sunday": "Sun: Closed"
+    },
+    "cta": "Get directions",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Message",
+      "submit": "Send message"
+    }
+  },
+  "footer": {
+    "copyright": "© AURA Luxe Clinic. All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "floating": {
+    "call": "Call",
+    "chat": "Chat",
+    "book": "Book",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  }
+}

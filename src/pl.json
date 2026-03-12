@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "home": "Strona główna",
+    "about": "O nas",
+    "services": "Usługi",
+    "price": "Ceny",
+    "gallery": "Galeria",
+    "reviews": "Opinie",
+    "booking": "Rezerwacja",
+    "contacts": "Kontakt",
+    "menu": "Menu",
+    "book": "Zarezerwuj"
+  },
+  "hero": {
+    "location": "KIJÓW • MEDYCYNA ESTETYCZNA",
+    "title": "AURA Luxe Clinic",
+    "subtitle": "Spersonalizowana opieka. Subtelne rezultaty. Trwała pewność siebie.",
+    "cta_primary": "Zarezerwuj konsultację",
+    "cta_secondary": "Poznaj usługi"
+  },
+  "signature": {
+    "label": "NAUKOWA PIELĘGNACJA SKÓRY",
+    "title": "Signaturowa Opieka AURA",
+    "description": "Łączymy precyzję kliniczną z redaktorskim okiem, aby każdy zabieg wyglądał jak Ty, tylko lepiej.",
+    "link": "Poznaj zespół"
+  },
+  "about": {
+    "title": "O AURA",
+    "description": "Jesteśmy zespołem lekarzy medycyny estetycznej i certyfikowanych terapeutów skupionych na profilaktycznym zdrowiu skóry. Nasze protokoły oparte są na dowodach, nasze środowisko jest spokojne, a rezultaty naturalne.",
+    "stats": {
+      "years": "12+ Lat",
+      "clients": "6K+ Klientów",
+      "rating": "4.9 Ocena"
+    },
+    "cta": "Przeczytaj naszą historię"
+  },
+  "services": {
+    "title": "Nasze Usługi",
+    "description": "Od pierwszych zabiegów twarzy po zaawansowane plany estetyczne, tworzymy zabiegi dostosowane do Twojego harmonogramu, wrażliwości i celów.",
+    "list": {
+      "consultation": "Konsultacja Estetyczna",
+      "injectables": "Zastrzyki i Wypełniacze",
+      "laser": "Laser i Urządzenia Energetyczne",
+      "facials": "Zabiegi Twarzy Medyczne"
+    },
+    "cta": "Zobacz pełne menu"
+  },
+  "treatments": {
+    "title": "Zabiegi",
+    "description": "Każdy plan zaczyna się od oceny skóry. Priorytetem jest bezpieczeństwo, minimalny czas rekonwalescencji i rezultaty poprawiające się z czasem.",
+    "chips": {
+      "products": "Testowane produkty",
+      "care": "Zestaw pielęgnacji pozabiegowej"
+    },
+    "cta": "Zobacz protokoły"
+  },
+  "results": {
+    "title": "Rezultaty",
+    "description": "Poprawy pojawiają się stopniowo — lepsza tekstura, mniej zaczerwienienia, jaśniejszy odcień. Fotografujemy postępy i dostosowujemy protokoły.",
+    "metric": "Średnia satysfakcja klientów: 4.9/5",
+    "cta": "Zobacz studia przypadków"
+  },
+  "team": {
+    "title": "Zespół",
+    "description": "Nasi praktycy stale się szkolą — nowe techniki, bezpieczniejsze protokoły i wyrafinowane poczucie równowagi. Najpierw słuchamy, potem leczymy.",
+    "members": {
+      "olena": "Dr Olena K. — Dyrektor Medyczny",
+      "anastasiia": "Anastasiia R. — Główna Estetyczka",
+      "yulia": "Yulia M. — Terapeutka Skóry"
+    },
+    "cta": "Poznaj wszystkich"
+  },
+  "booking": {
+    "title": "Rezerwacja",
+    "description": "Wybierz usługę, wybierz godzinę i przyjdź 10 minut wcześniej. Potwierdzimy SMS-em i wyślemy instrukcje przygotowania.",
+    "contact": "+38 044 000 00 00 • hello@auraclinic.ua",
+    "cta_primary": "Zarezerwuj online",
+    "cta_secondary": "Poproś o telefon"
+  },
+  "gift": {
+    "title": "Karta Podarunkowa",
+    "description": "Podaruj doświadczenie pięknej skóry. Wybierz kwotę, dodaj notatkę, a my zajmiemy się resztą, włącznie z pięknym opakowaniem.",
+    "badge": "Dostępne karty cyfrowe i fizyczne",
+    "cta": "Kup kartę podarunkową"
+  },
+  "reviews": {
+    "title": "Opinie",
+    "description": "Prosimy o opinie po każdym cyklu zabiegów. Oto, co nasi klienci mówią o doświadczeniu i rezultatach.",
+    "quote": "Moja skóra nigdy nie czuła się tak spokojna i czysta.",
+    "author": "— Daria T.",
+    "cta": "Przeczytaj więcej opinii"
+  },
+  "contact": {
+    "title": "Odwiedź AURA",
+    "address": "ul. Reitarska 12B, Kijów, Ukraina",
+    "hours": {
+      "weekdays": "Pn–Pt: 09:00–20:00",
+      "saturday": "Sob: 10:00–18:00",
+      "sunday": "Ndz: Zamknięte"
+    },
+    "cta": "Wyznacz trasę",
+    "form": {
+      "name": "Imię",
+      "email": "Email",
+      "phone": "Telefon",
+      "message": "Wiadomość",
+      "submit": "Wyślij wiadomość"
+    }
+  },
+  "footer": {
+    "copyright": "© AURA Luxe Clinic. Wszelkie prawa zastrzeżone.",
+    "privacy": "Prywatność",
+    "terms": "Warunki"
+  },
+  "floating": {
+    "call": "Zadzwoń",
+    "chat": "Czat",
+    "book": "Zarezerwuj",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  }
+}

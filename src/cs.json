@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "home": "Domů",
+    "about": "O nás",
+    "services": "Služby",
+    "price": "Ceny",
+    "gallery": "Galerie",
+    "reviews": "Recenze",
+    "booking": "Rezervace",
+    "contacts": "Kontakt",
+    "menu": "Menu",
+    "book": "Rezervovat"
+  },
+  "hero": {
+    "location": "KYJEV • ESTETICKÁ MEDICÍNA",
+    "title": "AURA Luxe Clinic",
+    "subtitle": "Personalizovaná péče. Jemné výsledky. Trvající sebevědomí.",
+    "cta_primary": "Rezervovat konzultaci",
+    "cta_secondary": "Prozkoumat služby"
+  },
+  "signature": {
+    "label": "VĚDECKÁ PÉČE O PLEŤ",
+    "title": "Signature AURA Péče",
+    "description": "Kombinujeme klinickou přesnost s editorským okem, aby každá procedura vypadala jako vy, jen vylepšená.",
+    "link": "Seznámit se s týmem"
+  },
+  "about": {
+    "title": "O AURA",
+    "description": "Jsme tým estetických lékařů a certifikovaných terapeutů zaměřených na preventivní zdraví pleti. Naše protokoly jsou založeny na důkazech, naše prostředí je klidné a naše výsledky vypadají přirozeně.",
+    "stats": {
+      "years": "12+ Let",
+      "clients": "6K+ Klientů",
+      "rating": "4.9 Hodnocení"
+    },
+    "cta": "Přečíst náš příběh"
+  },
+  "services": {
+    "title": "Naše Služby",
+    "description": "Od prvních facialů po pokročilé estetické plány vytváříme procedury podle vašeho rozvrhu, citlivosti a cílů.",
+    "list": {
+      "consultation": "Estetická konzultace",
+      "injectables": "Injekce a výplně",
+      "laser": "Laser a energetická zařízení",
+      "facials": "Lékařské facialy"
+    },
+    "cta": "Zobrazit celé menu"
+  },
+  "treatments": {
+    "title": "Procedury",
+    "description": "Každý plán začíná hodnocením pleti. Upřednostňujeme bezpečnost, minimální prostoj a výsledky, které se časem zlepšují.",
+    "chips": {
+      "products": "Testované produkty",
+      "care": "Sada péče po proceduře"
+    },
+    "cta": "Zobrazit protokoly"
+  },
+  "results": {
+    "title": "Výsledky",
+    "description": "Vylepšení se objevují postupně — lepší textura, méně zarudnutí, jasnější tón. Fotíme pokrok a upravujeme protokoly.",
+    "metric": "Průměrná spokojenost klientů: 4.9/5",
+    "cta": "Zobrazit případové studie"
+  },
+  "team": {
+    "title": "Tým",
+    "description": "Naši praktici se neustále vzdělávají — nové techniky, bezpečnější protokoly a vytříbený smysl pro rovnováhu. Nejprve posloucháme, pak léčíme.",
+    "members": {
+      "olena": "Dr. Olena K. — Lékařská ředitelka",
+      "anastasiia": "Anastasiia R. — Hlavní estetička",
+      "yulia": "Yulia M. — Terapeutka pleti"
+    },
+    "cta": "Seznámit se se všemi"
+  },
+  "booking": {
+    "title": "Rezervace",
+    "description": "Vyberte službu, zvolte čas a přijeďte 10 minut předem. Potvrdíme SMS a pošleme přípravné instrukce.",
+    "contact": "+38 044 000 00 00 • hello@auraclinic.ua",
+    "cta_primary": "Rezervovat online",
+    "cta_secondary": "Požádat o hovor"
+  },
+  "gift": {
+    "title": "Dárková karta",
+    "description": "Darujte zážitek skvělé pleti. Vyberte částku, přidejte poznámku a my se postaráme o zbytek, včetně krásného balení.",
+    "badge": "Dostupné digitální a fyzické karty",
+    "cta": "Koupit dárkovou kartu"
+  },
+  "reviews": {
+    "title": "Recenze",
+    "description": "Žádáme o zpětnou vazbu po každém cyklu procedur. To, co naši klienti říkají o zážitku a výsledcích.",
+    "quote": "Moje pleť se nikdy necítila tak klidná a čistá.",
+    "author": "— Daria T.",
+    "cta": "Přečíst více recenzí"
+  },
+  "contact": {
+    "title": "Navštivte AURA",
+    "address": "Reitarska ul. 12B, Kyjev, Ukrajina",
+    "hours": {
+      "weekdays": "Po–Pá: 09:00–20:00",
+      "saturday": "So: 10:00–18:00",
+      "sunday": "Ne: Zavřeno"
+    },
+    "cta": "Získat trasu",
+    "form": {
+      "name": "Jméno",
+      "email": "Email",
+      "phone": "Telefon",
+      "message": "Zpráva",
+      "submit": "Odeslat zprávu"
+    }
+  },
+  "footer": {
+    "copyright": "© AURA Luxe Clinic. Všechna práva vyhrazena.",
+    "privacy": "Ochrana soukromí",
+    "terms": "Podmínky"
+  },
+  "floating": {
+    "call": "Zavolat",
+    "chat": "Chat",
+    "book": "Rezervovat",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  }
+}
