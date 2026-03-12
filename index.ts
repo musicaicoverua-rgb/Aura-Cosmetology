@@ -1,0 +1,10 @@
+export { Dashboard } from './Dashboard';
+export { Appointments } from './Appointments';
+export { Clients } from './Clients';
+export { Services } from './Services';
+export { Messages } from './Messages';
+export { Reviews } from './Reviews';
+export { Gallery } from './Gallery';
+export { Content } from './Content';
+export { Settings } from './Settings';
+export { AdminLogin } from './AdminLogin';
