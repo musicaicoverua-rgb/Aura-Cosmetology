@@ -338,15 +338,10 @@ const HeroSection: React.FC = () => {
 
               {/* Main Title */}
               <h1
-                ref={titleRef}
-                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight"
-              >
-                <span className="block">
-                  {heroContent?.title?.split(' ').slice(0, 2).join(' ') || 'Reveal Your'}
-                </span>
+                ref={titleRef} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
                 <span className="block bg-gradient-to-r from-rose-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
-                  {heroContent?.title?.split(' ').slice(2).join(' ') || 'Natural Beauty'}
-                </span>
+                {heroContent?.title || 'Мій Заголовок'}
+               </span>
               </h1>
 
               {/* Subtitle/Tagline */}
