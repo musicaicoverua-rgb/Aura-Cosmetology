@@ -153,9 +153,11 @@ const PublicLayout: React.FC = () => {
         >
           <div className="text-center">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Services Section
-            </h2>
-            <p className="text-slate-400">Coming soon...</p>
+  {servicesData?.title || 'Наші послуги'}
+</h2>
+<p className="text-slate-400">
+  {servicesData?.description || 'Опис послуг завантажується...'}
+</p>
           </div>
         </section>
 
