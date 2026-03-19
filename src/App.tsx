@@ -64,7 +64,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 // =============================================================================
 
 const PublicLayout: React.FC = () => {
+  // Рядок 66
+const PublicLayout: React.FC = () => {
+  // Рядок 67
   const { getAboutContent, getServicesContent } = useContent();
+  
+  // ДОДАЙ ЦІ ДВА РЯДКИ ТУТ:
+  const aboutData = getAboutContent();
+  const servicesData = getServicesContent();
+
+  // Рядок 68 (далі йде твій існуючий код)
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Navigation */}
