@@ -270,6 +270,6 @@ const App: React.FC = () => {
       </ContentProvider>
     </AuthProvider>
   );
-}; //
+}; 
 
-export default App; //
+export default App; 
