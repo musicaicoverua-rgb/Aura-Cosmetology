@@ -64,9 +64,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 // =============================================================================
 
 const PublicLayout: React.FC = () => {
-  const { getAboutContent, getServicesContent } = useContent();
+  const { getAboutContent, getServicesContent, getTestimonialsContent, getContactContent } = useContent();
   const aboutData = getAboutContent();
   const servicesData = getServicesContent();
+  const testimonialsData = getTestimonialsContent();
+const contactData = getContactContent();
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Navigation */}
@@ -166,10 +168,12 @@ const PublicLayout: React.FC = () => {
           className="min-h-screen bg-slate-950 flex items-center justify-center"
         >
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Testimonials Section
-            </h2>
-            <p className="text-slate-400">Coming soon...</p>
+           <h2 className="text-4xl font-bold text-white mb-4">
+  {testimonialsData?.title || 'Відгуки'}
+</h2>
+<p className="text-slate-400">
+  {testimonialsData?.description || 'Відгуки завантажуються...'}
+</p>
           </div>
         </section>
 
@@ -179,9 +183,11 @@ const PublicLayout: React.FC = () => {
         >
           <div className="text-center">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Contact Section
-            </h2>
-            <p className="text-slate-400">Coming soon...</p>
+  {contactData?.title || 'Контакти'}
+</h2>
+<p className="text-slate-400">
+  {contactData?.description || 'Контактна інформація скоро з’явиться...'}
+</p>
           </div>
         </section>
       </main>
