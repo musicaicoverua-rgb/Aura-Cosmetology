@@ -63,6 +63,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 // =============================================================================
 
 const PublicLayout: React.FC = () => {
+  const { getAboutContent, getServicesContent } = useContent();
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Navigation */}
@@ -134,8 +135,12 @@ const PublicLayout: React.FC = () => {
           className="min-h-screen bg-slate-950 flex items-center justify-center"
         >
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">About Section</h2>
-            <p className="text-slate-400">Coming soon...</p>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              {aboutData?.title || 'Про нас'}
+                   </h2>
+            <p className="text-slate-400">
+  {aboutData?.description || 'Завантаження опису...'}
+</p>
           </div>
         </section>
 
