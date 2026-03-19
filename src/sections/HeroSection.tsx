@@ -337,12 +337,11 @@ const HeroSection: React.FC = () => {
               </div>
 
               {/* Main Title */}
-              <h1
-                ref={titleRef} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
-                <span className="block bg-gradient-to-r from-rose-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
-                {heroContent?.title || 'Мій Заголовок'}
-               </span>
-              </h1>
+              <h1 ref={titleRef} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
+  <span className="block bg-gradient-to-r from-rose-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
+    {heroContent?.title || 'Мій Заголовок'}
+  </span>
+</h1>
 
               {/* Subtitle/Tagline */}
               <p
