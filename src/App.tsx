@@ -20,6 +20,7 @@ import { Toaster } from 'sonner';
 
 // Contexts
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useContent } from '@/contexts/ContentContext';
 import { ContentProvider } from '@/contexts/ContentContext';
 
 // Admin Pages
