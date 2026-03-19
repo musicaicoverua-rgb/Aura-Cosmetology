@@ -542,9 +542,10 @@ const ContentEditor: React.FC = () => {
                           handleHeroChange('image_url', imageUrl);
                           toast.dismiss(loadingToast);
                           toast.success('Image uploaded! Click Save Changes to apply.');
-                        } catch (error) {
-                          toast.error('Failed to upload image');
-                        }
+                        } catch (error: any) {
+  toast.error(`Помилка: ${error.message || 'Не вдалося завантажити'}`);
+}
+
                       }}
                       className="bg-slate-800 border-slate-700 text-slate-300 file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-1 file:mr-4 hover:file:bg-slate-600 cursor-pointer"
                     />
