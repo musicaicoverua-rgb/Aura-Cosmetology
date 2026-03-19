@@ -27,6 +27,7 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContent } from '@/contexts/ContentContext';
+import { uploadImage } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -520,6 +521,44 @@ const ContentEditor: React.FC = () => {
                     className="bg-slate-800 border-slate-700 text-white min-h-[120px]"
                     placeholder="Enter hero section description..."
                   />
+                </div>
+                {/* НОВИЙ БЛОК ДЛЯ ФОТО */}
+                <div className="space-y-2 pt-4 border-t border-slate-800">
+                  <Label className="text-slate-300 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    Hero Image
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        try {
+                          const loadingToast = toast.loading('Uploading image...');
+                          const imageUrl = await uploadImage(file);
+                          handleHeroChange('image_url', imageUrl);
+                          toast.dismiss(loadingToast);
+                          toast.success('Image uploaded! Click Save Changes to apply.');
+                        } catch (error) {
+                          toast.error('Failed to upload image');
+                        }
+                      }}
+                      className="bg-slate-800 border-slate-700 text-slate-300 file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-1 file:mr-4 hover:file:bg-slate-600 cursor-pointer"
+                    />
+                  </div>
+                  {/* Показуємо попередній перегляд, якщо фото вже є */}
+                  {(heroForm as any).image_url && (
+                    <div className="mt-4 relative w-40 h-40 rounded-xl overflow-hidden border border-slate-700">
+                      <img 
+                        src={(heroForm as any).image_url} 
+                        alt="Hero preview" 
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-end">
                   {renderSaveButton(handleSaveHero)}
