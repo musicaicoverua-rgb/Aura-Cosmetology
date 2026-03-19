@@ -435,7 +435,16 @@ const HeroSection: React.FC = () => {
             >
               <div className="relative aspect-[4/5] lg:aspect-[3/4] rounded-3xl overflow-hidden">
                 {/* Image placeholder - replace with actual image */}
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 via-purple-500/20 to-amber-500/20" />
+{heroContent?.image_url ? (
+  <img
+    src={heroContent.image_url}
+    alt="Aura Cosmetology"
+    className="absolute inset-0 w-full h-full object-cover z-0"
+  />
+) : (
+  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 via-purple-500/20 to-amber-500/20" />
+)}
+
 
                 {/* Decorative frame */}
                 <div className="absolute inset-4 border border-white/10 rounded-2xl" />
