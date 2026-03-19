@@ -277,5 +277,30 @@ export const deleteSiteContent = async (sectionKey: string): Promise<void> => {
     );
   }
 };
+/**
+ * Upload an image to Supabase Storage
+ */
+export const uploadImage = async (file: File): Promise<string> => {
+  // Генеруємо унікальне ім'я файлу, щоб вони не перезаписували один одного
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+  const filePath = `${fileName}`;
 
+  // Завантажуємо файл у кошик "images"
+  const { error: uploadError } = await supabase.storage
+    .from('images')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error('Error uploading image:', uploadError);
+    throw new Error(`Failed to upload image: ${uploadError.message}`);
+  }
+
+  // Отримуємо публічне посилання на файл, щоб показати його на сайті
+  const { data } = supabase.storage
+    .from('images')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+};
 export default supabase;
