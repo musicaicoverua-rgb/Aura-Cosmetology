@@ -226,16 +226,16 @@ r">
           </div>
         </div>
       </footer>
-           {/* Плаваюча кнопка чату (Telegram) */}
+            {/* Плаваюча кнопка чату (Telegram) */}
       <a
-        href="https://t.me/твій_нік" 
+        href="https://www.instagram.com/lux_cosmetologia?igsh=MWM2M2Zza215aWFpbQ==" 
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:scale-110 transition-transform z-50"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
       </a>
-      
+
     </div>
   );
 };
