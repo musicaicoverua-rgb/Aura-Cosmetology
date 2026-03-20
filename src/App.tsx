@@ -3,79 +3,39 @@
 // ============================================================================
 
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-  Link,
-  useLocation
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import supabase from '@/lib/supabase';
 
-// Contexts
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useContent, ContentProvider } from '@/contexts/ContentContext';
 
-// Admin Pages
 import AdminLogin from '@/admin/pages/AdminLogin';
 import ContentEditor from '@/admin/pages/ContentEditor';
-
-// Public Sections
 import HeroSection from '@/sections/HeroSection';
 
-// =============================================================================
-// PROTECTED ROUTE
-// =============================================================================
-
-interface ProtectedRouteProps {
-  children?: React.ReactNode;
-}
+interface ProtectedRouteProps { children?: React.ReactNode; }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
+  if (isLoading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
   return children ? <>{children}</> : <Outlet />;
 };
 
-// =============================================================================
-// АНІМАЦІЯ ПЕРЕХОДІВ
-// =============================================================================
 const PageTransition: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const location = useLocation();
   return (
     <div key={location.pathname} style={{ animation: 'fadeSlideUp 0.6s ease-out forwards' }} className="w-full">
-      <style>{`
-        @keyframes fadeSlideUp {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      <style>{`@keyframes fadeSlideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }`}</style>
       {children}
     </div>
   );
 };
 
-// =============================================================================
-// СТОРІНКИ САЙТУ
-// =============================================================================
-
-// 1. Головна
 const HomePage: React.FC = () => {
   const { getAboutContent } = useContent();
   const aboutData = getAboutContent();
-
   return (
     <PageTransition>
       <HeroSection />
@@ -89,7 +49,6 @@ const HomePage: React.FC = () => {
   );
 };
 
-// 2. Послуги
 const ServicesPage: React.FC = () => {
   const { getServicesContent } = useContent();
   const servicesData = getServicesContent();
@@ -111,7 +70,6 @@ const ServicesPage: React.FC = () => {
         <div className="text-center max-w-6xl mx-auto px-4 w-full">
           <h1 className="text-4xl font-bold text-white mb-4 text-rose-500">{servicesData?.title || 'Наші послуги'}</h1>
           <p className="text-slate-400 mb-12 max-w-2xl mx-auto">{servicesData?.description || 'Опис послуг завантажується...'}</p>
-
           {loading ? (
             <div className="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           ) : servicesList.length === 0 ? (
@@ -135,7 +93,6 @@ const ServicesPage: React.FC = () => {
   );
 };
 
-// 3. Галерея
 const GalleryPage: React.FC = () => {
   const [images, setImages] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -155,7 +112,6 @@ const GalleryPage: React.FC = () => {
         <div className="text-center max-w-6xl mx-auto px-4 w-full">
           <h1 className="text-4xl font-bold text-white mb-4 text-purple-500">Галерея робіт</h1>
           <p className="text-slate-400 mb-12">Результати нашої роботи до та після</p>
-
           {loading ? (
             <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           ) : images.length === 0 ? (
@@ -178,7 +134,6 @@ const GalleryPage: React.FC = () => {
   );
 };
 
-// 4. Прайс-лист 
 const PricingPage: React.FC = () => {
   const [pricingList, setPricingList] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -208,7 +163,6 @@ const PricingPage: React.FC = () => {
             <h1 className="text-4xl font-bold text-white mb-4 text-amber-500">Прайс-лист</h1>
             <p className="text-slate-400">Прозорі ціни на всі процедури</p>
           </div>
-
           {loading ? (
             <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           ) : pricingList.length === 0 ? (
@@ -238,7 +192,6 @@ const PricingPage: React.FC = () => {
   );
 };
 
-// 5. Контакти
 const ContactPage: React.FC = () => {
   const { getContactContent, settings } = useContent();
   const contactData = getContactContent();
@@ -249,7 +202,6 @@ const ContactPage: React.FC = () => {
         <div className="max-w-4xl w-full mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold text-white mb-4 text-blue-500">{contactData?.title || 'Контакти'}</h1>
           <p className="text-slate-400 mb-12">{contactData?.description || 'Зв’яжіться з нами зручним для вас способом'}</p>
-
           <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 max-w-lg mx-auto text-left backdrop-blur-sm">
             <div className="space-y-6 text-slate-300 text-lg">
               {settings?.phone && <p className="flex items-center gap-4">📞 <a href={`tel:${settings.phone}`} className="hover:text-rose-400 transition-colors">{settings.phone}</a></p>}
@@ -265,10 +217,6 @@ const ContactPage: React.FC = () => {
   );
 };
 
-// =============================================================================
-// ГОЛОВНИЙ ШАБЛОН
-// =============================================================================
-
 const PublicLayout: React.FC = () => {
   const { settings } = useContent();
 
@@ -283,7 +231,6 @@ const PublicLayout: React.FC = () => {
               </div>
               <span className="text-white font-semibold hidden sm:block">Aura Cosmetology</span>
             </Link>
-
             <div className="hidden md:flex items-center gap-8">
               <Link to="/" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Головна</Link>
               <Link to="/services" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Послуги</Link>
@@ -291,7 +238,6 @@ const PublicLayout: React.FC = () => {
               <Link to="/gallery" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Галерея</Link>
               <Link to="/contact" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Контакти</Link>
             </div>
-
             <a href={`tel:${settings?.phone || '+38000000000'}`} className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-rose-500/25 transition-all flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
               Подзвонити
@@ -299,18 +245,14 @@ const PublicLayout: React.FC = () => {
           </div>
         </div>
       </nav>
-
       <main className="flex-grow pt-16">
         <Outlet />
       </main>
-
       <footer className="bg-slate-950 border-t border-slate-800 py-12 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
+              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-purple-600 rounded-lg flex items-center justify-center"><span className="text-white font-bold text-sm">A</span></div>
               <span className="text-white font-semibold">Aura Cosmetology</span>
             </div>
             <p className="text-slate-500 text-sm">© 2024 Aura Cosmetology. All rights reserved.</p>
@@ -318,17 +260,12 @@ const PublicLayout: React.FC = () => {
           </div>
         </div>
       </footer>
-      
       <a href={settings?.instagram?.includes('http') ? settings.instagram : `https://instagram.com/${settings?.instagram?.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-tr from-yellow-400 via-rose-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(225,29,72,0.5)] hover:scale-110 transition-transform z-50">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
       </a>
     </div>
   );
 };
-
-// =============================================================================
-// МАРШРУТИЗАЦІЯ
-// =============================================================================
 
 const App: React.FC = () => {
   return (
@@ -343,13 +280,11 @@ const App: React.FC = () => {
               <Route path="gallery" element={<GalleryPage />} />
               <Route path="contact" element={<ContactPage />} />
             </Route>
-
             <Route path="/admin" element={<div className="min-h-screen bg-slate-950"><Outlet /></div>}>
               <Route path="login" element={<AdminLogin />} />
               <Route path="dashboard" element={<ProtectedRoute><ContentEditor /></ProtectedRoute>} />
               <Route index element={<Navigate to="login" replace />} />
             </Route>
-
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
