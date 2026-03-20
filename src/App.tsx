@@ -135,7 +135,7 @@ const ServicesPage: React.FC = () => {
   );
 };
 
-// 3. Галерея (Залишаємо як було, вона працює ідеально)
+// 3. Галерея 
 const GalleryPage: React.FC = () => {
   const [images, setImages] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -178,7 +178,7 @@ const GalleryPage: React.FC = () => {
   );
 };
 
-// 4. Прайс-лист (Розумна сторінка)
+// 4. Прайс-лист (Розумна сторінка - ВИПРАВЛЕНО TS)
 const PricingPage: React.FC = () => {
   const [pricingList, setPricingList] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -220,7 +220,8 @@ const PricingPage: React.FC = () => {
                     <h2 className="text-xl font-bold text-amber-500">{category}</h2>
                   </div>
                   <div className="divide-y divide-slate-700/50">
-                    {items.map(item => (
+                    {/* Ось тут додано явні типи для items та item */}
+                    {(items as any[]).map((item: any) => (
                       <div key={item.id} className="flex justify-between items-center p-4 hover:bg-slate-800/50 transition-colors">
                         <span className="text-slate-300 font-medium">{item.name}</span>
                         <span className="text-white font-bold bg-slate-900 px-4 py-1 rounded-full border border-slate-700">{item.price}</span>
