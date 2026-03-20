@@ -1,27 +1,12 @@
 // ============================================================================
-// CONTENT EDITOR - ADMIN DASHBOARD
+// CONTENT EDITOR - ADMIN DASHBOARD (FINAL WITH DYNAMIC SERVICES & PRICING)
 // ============================================================================
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Save,
-  RefreshCw,
-  LogOut,
-  Layout,
-  Settings,
-  Type,
-  FileText,
-  Sparkles,
-  AlertCircle,
-  Phone,
-  Mail,
-  MapPin,
-  Instagram,
-  Clock,
-  Image as ImageIcon,
-  Trash2,
-  Upload
+  Save, RefreshCw, LogOut, Layout, Settings, Type, FileText, Sparkles, AlertCircle,
+  Phone, Mail, MapPin, Instagram, Clock, Image as ImageIcon, Trash2, Upload, Plus, DollarSign
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,21 +25,7 @@ import { Separator } from '@/components/ui/separator';
 const ContentEditor: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut, isAuthenticated, isLoading: authLoading } = useAuth();
-  const {
-    settings,
-    siteContent,
-    isLoading: contentLoading,
-    isSaving,
-    error,
-    updateSettings,
-    updateContent,
-    refreshContent,
-    getHeroContent,
-    getAboutContent,
-    getServicesContent,
-    getContactContent,
-    getTestimonialsContent,
-  } = useContent();
+  const { settings, siteContent, isLoading: contentLoading, isSaving, error, updateSettings, updateContent, refreshContent, getHeroContent, getAboutContent, getServicesContent, getContactContent, getTestimonialsContent } = useContent();
 
   const [activeTab, setActiveTab] = useState('hero');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -63,66 +34,61 @@ const ContentEditor: React.FC = () => {
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
 
+  // Стейт для Послуг (Динамічні картки)
+  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [newService, setNewService] = useState({ title: '', description: '' });
+  const [isAddingService, setIsAddingService] = useState(false);
+
+  // Стейт для Прайсу
+  const [pricingList, setPricingList] = useState<any[]>([]);
+  const [newPricing, setNewPricing] = useState({ category: '', name: '', price: '' });
+  const [isAddingPricing, setIsAddingPricing] = useState(false);
+
   // Form states
-  const [settingsForm, setSettingsForm] = useState({
-    clinic_name: '', phone: '', email: '', instagram: '', address: '', working_hours: '',
-  });
+  const [settingsForm, setSettingsForm] = useState({ clinic_name: '', phone: '', email: '', instagram: '', address: '', working_hours: '' });
   const [heroForm, setHeroForm] = useState({ title: '', subtitle: '', description: '', image_url: '' });
   const [aboutForm, setAboutForm] = useState({ title: '', subtitle: '', description: '' });
   const [servicesForm, setServicesForm] = useState({ title: '', subtitle: '', description: '' });
   const [contactForm, setContactForm] = useState({ title: '', subtitle: '', description: '' });
   const [testimonialsForm, setTestimonialsForm] = useState({ title: '', subtitle: '', description: '' });
 
-  // Auth & Data loading
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) navigate('/admin/login');
-  }, [isAuthenticated, authLoading, navigate]);
+  useEffect(() => { if (!authLoading && !isAuthenticated) navigate('/admin/login'); }, [isAuthenticated, authLoading, navigate]);
 
   useEffect(() => {
     if (settings) {
-      setSettingsForm({
-        clinic_name: settings.clinic_name || '', phone: settings.phone || '', email: settings.email || '',
-        instagram: settings.instagram || '', address: settings.address || '', working_hours: settings.working_hours || '',
-      });
+      setSettingsForm({ clinic_name: settings.clinic_name || '', phone: settings.phone || '', email: settings.email || '', instagram: settings.instagram || '', address: settings.address || '', working_hours: settings.working_hours || '' });
     }
   }, [settings]);
 
   useEffect(() => {
-    const hero = getHeroContent();
-    if (hero) setHeroForm({ title: hero.title, subtitle: hero.subtitle, description: hero.description, image_url: hero.image_url || '' });
-    const about = getAboutContent();
-    if (about) setAboutForm({ title: about.title, subtitle: about.subtitle, description: about.description });
-    const services = getServicesContent();
-    if (services) setServicesForm({ title: services.title, subtitle: services.subtitle, description: services.description });
-    const contact = getContactContent();
-    if (contact) setContactForm({ title: contact.title, subtitle: contact.subtitle, description: contact.description });
-    const testimonials = getTestimonialsContent();
-    if (testimonials) setTestimonialsForm({ title: testimonials.title, subtitle: testimonials.subtitle, description: testimonials.description });
+    const hero = getHeroContent(); if (hero) setHeroForm({ title: hero.title, subtitle: hero.subtitle, description: hero.description, image_url: hero.image_url || '' });
+    const about = getAboutContent(); if (about) setAboutForm({ title: about.title, subtitle: about.subtitle, description: about.description });
+    const services = getServicesContent(); if (services) setServicesForm({ title: services.title, subtitle: services.subtitle, description: services.description });
+    const contact = getContactContent(); if (contact) setContactForm({ title: contact.title, subtitle: contact.subtitle, description: contact.description });
+    const testimonials = getTestimonialsContent(); if (testimonials) setTestimonialsForm({ title: testimonials.title, subtitle: testimonials.subtitle, description: testimonials.description });
   }, [siteContent, getHeroContent, getAboutContent, getServicesContent, getContactContent, getTestimonialsContent]);
 
-  // Завантаження фотографій галереї при відкритті адмінки
+  // Завантаження Галереї, Послуг і Прайсу
   useEffect(() => {
-    const fetchGallery = async () => {
-      const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-      if (data) setGalleryImages(data);
+    const fetchData = async () => {
+      const [galRes, srvRes, prcRes] = await Promise.all([
+        supabase.from('gallery').select('*').order('created_at', { ascending: false }),
+        supabase.from('services_items').select('*').order('created_at', { ascending: true }),
+        supabase.from('pricing_items').select('*').order('created_at', { ascending: true })
+      ]);
+      if (galRes.data) setGalleryImages(galRes.data);
+      if (srvRes.data) setServicesList(srvRes.data);
+      if (prcRes.data) setPricingList(prcRes.data);
     };
-    if (isAuthenticated) fetchGallery();
+    if (isAuthenticated) fetchData();
   }, [isAuthenticated]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast.success('Signed out successfully');
-      navigate('/admin/login');
-    } catch (err) {
-      toast.error('Failed to sign out');
-    }
-  };
+  const handleSignOut = async () => { try { await signOut(); toast.success('Signed out successfully'); navigate('/admin/login'); } catch (err) { toast.error('Failed to sign out'); } };
 
   const handleSaveSettings = async () => { try { await updateSettings(settingsForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleSaveHero = async () => { try { await updateContent('hero', heroForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleSaveAbout = async () => { try { await updateContent('about', aboutForm); setHasUnsavedChanges(false); } catch (err) {} };
-  const handleSaveServices = async () => { try { await updateContent('services', servicesForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleSaveServicesSection = async () => { try { await updateContent('services', servicesForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleSaveContact = async () => { try { await updateContent('contact', contactForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleSaveTestimonials = async () => { try { await updateContent('testimonials', testimonialsForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleRefresh = async () => { await refreshContent(); setHasUnsavedChanges(false); };
@@ -134,179 +100,86 @@ const ContentEditor: React.FC = () => {
   const handleContactChange = (field: string, value: string) => { setContactForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
   const handleTestimonialsChange = (field: string, value: string) => { setTestimonialsForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
 
+  // --- HANDLERS FOR DYNAMIC DATA ---
+  const handleAddService = async () => {
+    if (!newService.title) return toast.error('Назва послуги обов\'язкова');
+    setIsAddingService(true);
+    try {
+      const { data, error } = await supabase.from('services_items').insert([newService]).select();
+      if (error) throw error;
+      setServicesList(prev => [...prev, data[0]]);
+      setNewService({ title: '', description: '' });
+      toast.success('Послугу додано');
+    } catch (err: any) { toast.error(err.message); } finally { setIsAddingService(false); }
+  };
+
+  const handleDeleteService = async (id: string) => {
+    if (!window.confirm('Видалити послугу?')) return;
+    try {
+      const { error } = await supabase.from('services_items').delete().eq('id', id);
+      if (error) throw error;
+      setServicesList(prev => prev.filter(item => item.id !== id));
+      toast.success('Послугу видалено');
+    } catch (err: any) { toast.error(err.message); }
+  };
+
+  const handleAddPricing = async () => {
+    if (!newPricing.category || !newPricing.name || !newPricing.price) return toast.error('Всі поля обов\'язкові');
+    setIsAddingPricing(true);
+    try {
+      const { data, error } = await supabase.from('pricing_items').insert([newPricing]).select();
+      if (error) throw error;
+      setPricingList(prev => [...prev, data[0]]);
+      setNewPricing({ category: newPricing.category, name: '', price: '' }); // Залишаємо категорію для зручності
+      toast.success('Ціну додано');
+    } catch (err: any) { toast.error(err.message); } finally { setIsAddingPricing(false); }
+  };
+
+  const handleDeletePricing = async (id: string) => {
+    if (!window.confirm('Видалити ціну?')) return;
+    try {
+      const { error } = await supabase.from('pricing_items').delete().eq('id', id);
+      if (error) throw error;
+      setPricingList(prev => prev.filter(item => item.id !== id));
+      toast.success('Ціну видалено');
+    } catch (err: any) { toast.error(err.message); }
+  };
+
   const renderSaveButton = (onSave: () => void) => (
-    <Button onClick={onSave} disabled={isSaving} className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white">
+    <Button onClick={onSave} disabled={isSaving} className="bg-gradient-to-r from-rose-500 to-purple-600 text-white">
       {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
     </Button>
   );
 
-  if (authLoading || contentLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  if (authLoading || contentLoading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="min-h-screen bg-slate-950">
       <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white">Aura Cosmetology</h1>
-                <p className="text-xs text-slate-400">Admin Dashboard</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {hasUnsavedChanges && (
-                <Badge variant="outline" className="border-amber-500/50 text-amber-400">
-                  <AlertCircle className="w-3 h-3 mr-1" /> Unsaved Changes
-                </Badge>
-              )}
-              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isSaving} className="border-slate-700 text-slate-300 hover:bg-slate-800">
-                <RefreshCw className="w-4 h-4 mr-2" /> Refresh
-              </Button>
-              <a href="/" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:bg-slate-800">
-                  <Layout className="w-4 h-4 mr-2" /> View Site
-                </Button>
-              </a>
-              <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400 hover:text-white hover:bg-slate-800">
-                <LogOut className="w-4 h-4 mr-2" /> Sign Out
-              </Button>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-purple-600 rounded-xl flex items-center justify-center"><Sparkles className="w-5 h-5 text-white" /></div>
+            <div><h1 className="text-lg font-bold text-white">Aura Cosmetology</h1><p className="text-xs text-slate-400">Admin Dashboard</p></div>
+          </div>
+          <div className="flex items-center gap-3">
+            {hasUnsavedChanges && <Badge variant="outline" className="border-amber-500/50 text-amber-400"><AlertCircle className="w-3 h-3 mr-1" /> Unsaved</Badge>}
+            <a href="/" target="_blank" rel="noopener noreferrer"><Button variant="outline" size="sm" className="border-slate-700 text-slate-300"><Layout className="w-4 h-4 mr-2" /> Site</Button></a>
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400"><LogOut className="w-4 h-4" /></Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <Alert className="mb-6 bg-red-500/10 border-red-500/30 text-red-400">
-            <AlertCircle className="w-4 h-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <div className="mb-8 p-6 bg-gradient-to-r from-rose-500/10 to-purple-600/10 rounded-2xl border border-rose-500/20">
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome back, {user?.email?.split('@')[0] || 'Admin'}!</h2>
-          <p className="text-slate-400">Manage your website content below. Changes are saved directly to the database.</p>
-        </div>
-
+      <main className="max-w-7xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-slate-900 border border-slate-800 p-1 flex flex-wrap h-auto gap-1">
-            <TabsTrigger value="hero" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Sparkles className="w-4 h-4 mr-2" /> Hero</TabsTrigger>
-            <TabsTrigger value="gallery" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"><ImageIcon className="w-4 h-4 mr-2" /> Галерея</TabsTrigger>
-            <TabsTrigger value="about" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Type className="w-4 h-4 mr-2" /> About</TabsTrigger>
-            <TabsTrigger value="services" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Layout className="w-4 h-4 mr-2" /> Services</TabsTrigger>
-            <TabsTrigger value="testimonials" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><FileText className="w-4 h-4 mr-2" /> Відгуки</TabsTrigger>
-            <TabsTrigger value="contact" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Mail className="w-4 h-4 mr-2" /> Contact</TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Settings className="w-4 h-4 mr-2" /> Settings</TabsTrigger>
+            <TabsTrigger value="hero" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Sparkles className="w-4 h-4 mr-2 hidden sm:block" /> Hero</TabsTrigger>
+            <TabsTrigger value="gallery" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"><ImageIcon className="w-4 h-4 mr-2 hidden sm:block" /> Галерея</TabsTrigger>
+            <TabsTrigger value="services" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Layout className="w-4 h-4 mr-2 hidden sm:block" /> Послуги</TabsTrigger>
+            <TabsTrigger value="pricing" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white"><DollarSign className="w-4 h-4 mr-2 hidden sm:block" /> Прайс</TabsTrigger>
+            <TabsTrigger value="about" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Type className="w-4 h-4 mr-2 hidden sm:block" /> About</TabsTrigger>
+            <TabsTrigger value="contact" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Mail className="w-4 h-4 mr-2 hidden sm:block" /> Contact</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Settings className="w-4 h-4 mr-2 hidden sm:block" /> Settings</TabsTrigger>
           </TabsList>
-
-          {/* НОВА ВКАЛДКА: ГАЛЕРЕЯ */}
-          <TabsContent value="gallery">
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-purple-500" />
-                  Галерея робіт
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  Завантажуйте фотографії. Вони автоматично з'являться на сторінці "Галерея" на сайті.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                
-                {/* Блок завантаження */}
-                <div className="p-8 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/30 flex flex-col items-center justify-center text-center hover:bg-slate-800/50 transition-colors">
-                  <Upload className="w-10 h-10 text-slate-400 mb-4" />
-                  <h3 className="text-xl font-medium text-white mb-2">Додати нове фото</h3>
-                  <p className="text-slate-400 mb-6">Виберіть файл з комп'ютера або телефону</p>
-                  
-                  <div className="relative inline-block">
-                    <Button disabled={isUploadingGallery} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg rounded-xl">
-                      {isUploadingGallery ? 'Завантаження...' : 'Вибрати фото'}
-                    </Button>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isUploadingGallery}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          setIsUploadingGallery(true);
-                          const loadingToast = toast.loading('Завантажуємо фото у хмару...');
-                          const imageUrl = await uploadImage(file);
-                          
-                          const { error } = await supabase.from('gallery').insert([{ image_url: imageUrl, title: 'Робота до/після' }]);
-                          if (error) throw error;
-                          
-                          const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-                          if (data) setGalleryImages(data);
-                          
-                          toast.dismiss(loadingToast);
-                          toast.success('Фото успішно додано в галерею!');
-                        } catch (error: any) {
-                          toast.error(`Помилка: ${error.message}`);
-                        } finally {
-                          setIsUploadingGallery(false);
-                          e.target.value = '';
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <Separator className="bg-slate-800" />
-
-                {/* Сітка завантажених фотографій */}
-                <div>
-                  <h3 className="text-xl font-medium text-white mb-6">Завантажені фотографії ({galleryImages.length})</h3>
-                  {galleryImages.length === 0 ? (
-                    <p className="text-slate-500 text-center py-8">Тут поки порожньо.</p>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {galleryImages.map((img) => (
-                        <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-800 aspect-square">
-                          <img src={img.image_url} alt="Gallery item" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={async () => {
-                                if (!window.confirm('Ви впевнені, що хочете видалити це фото з сайту?')) return;
-                                try {
-                                  const { error } = await supabase.from('gallery').delete().eq('id', img.id);
-                                  if (error) throw error;
-                                  setGalleryImages(prev => prev.filter(p => p.id !== img.id));
-                                  toast.success('Фото видалено');
-                                } catch (err) {
-                                  toast.error('Помилка видалення');
-                                }
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" /> Видалити
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* HERO TAB */}
           <TabsContent value="hero">
@@ -316,105 +189,125 @@ const ContentEditor: React.FC = () => {
                 <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={heroForm.subtitle} onChange={(e) => handleHeroChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
                 <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={heroForm.title} onChange={(e) => handleHeroChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
                 <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={heroForm.description} onChange={(e) => handleHeroChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
-                
                 <div className="space-y-2 pt-4 border-t border-slate-800">
-                  <Label className="text-slate-300 flex items-center gap-2"><Sparkles className="w-4 h-4" /> Головне фото (Hero Image)</Label>
-                  <div className="flex items-center gap-4">
-                    <Input type="file" accept="image/*" className="bg-slate-800 border-slate-700 text-slate-300 file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-1 file:mr-4 hover:file:bg-slate-600 cursor-pointer"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const loadingToast = toast.loading('Uploading image...');
-                          const imageUrl = await uploadImage(file);
-                          handleHeroChange('image_url', imageUrl);
-                          toast.dismiss(loadingToast);
-                          toast.success('Image uploaded! Click Save Changes to apply.');
-                        } catch (error) { toast.error('Failed to upload image'); }
-                      }}
-                    />
-                  </div>
-                  {heroForm.image_url && (
-                    <div className="mt-4 relative w-40 h-40 rounded-xl overflow-hidden border border-slate-700">
-                      <img src={heroForm.image_url} alt="Hero preview" className="object-cover w-full h-full" />
-                    </div>
-                  )}
+                  <Label className="text-slate-300">Hero Image</Label>
+                  <Input type="file" accept="image/*" className="bg-slate-800 border-slate-700 text-slate-300" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return;
+                    try { const loadingToast = toast.loading('Uploading...'); const imageUrl = await uploadImage(file); handleHeroChange('image_url', imageUrl); toast.dismiss(loadingToast); toast.success('Image uploaded!'); } catch (err) { toast.error('Failed to upload'); }
+                  }} />
+                  {heroForm.image_url && <div className="mt-4 w-40 h-40 rounded-xl overflow-hidden border border-slate-700"><img src={heroForm.image_url} alt="Preview" className="object-cover w-full h-full" /></div>}
                 </div>
                 <div className="flex justify-end">{renderSaveButton(handleSaveHero)}</div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ABOUT TAB */}
-          <TabsContent value="about">
+          {/* GALLERY TAB */}
+          <TabsContent value="gallery">
             <Card className="bg-slate-900 border-slate-800">
-              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Type className="w-5 h-5 text-rose-500" /> About Section</CardTitle></CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={aboutForm.subtitle} onChange={(e) => handleAboutChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={aboutForm.title} onChange={(e) => handleAboutChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={aboutForm.description} onChange={(e) => handleAboutChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[200px]" /></div>
-                <div className="flex justify-end">{renderSaveButton(handleSaveAbout)}</div>
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><ImageIcon className="w-5 h-5 text-purple-500" /> Галерея робіт</CardTitle></CardHeader>
+              <CardContent className="space-y-8">
+                <div className="p-8 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/30 flex flex-col items-center">
+                  <Upload className="w-10 h-10 text-slate-400 mb-4" />
+                  <div className="relative inline-block">
+                    <Button disabled={isUploadingGallery} className="bg-purple-600 hover:bg-purple-700 text-white px-8">{isUploadingGallery ? 'Завантаження...' : 'Вибрати фото'}</Button>
+                    <Input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={isUploadingGallery} onChange={async (e) => {
+                      const file = e.target.files?.[0]; if (!file) return;
+                      try { setIsUploadingGallery(true); const loadingToast = toast.loading('Завантажуємо...'); const imageUrl = await uploadImage(file); await supabase.from('gallery').insert([{ image_url: imageUrl, title: 'Робота' }]); const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false }); if (data) setGalleryImages(data); toast.dismiss(loadingToast); toast.success('Додано!'); } catch (err) { toast.error('Помилка'); } finally { setIsUploadingGallery(false); e.target.value = ''; }
+                    }} />
+                  </div>
+                </div>
+                <Separator className="bg-slate-800" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {galleryImages.map((img) => (
+                    <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-700 aspect-square">
+                      <img src={img.image_url} alt="Gallery" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="destructive" size="sm" onClick={async () => {
+                          if (!window.confirm('Видалити?')) return;
+                          await supabase.from('gallery').delete().eq('id', img.id); setGalleryImages(prev => prev.filter(p => p.id !== img.id));
+                        }}><Trash2 className="w-4 h-4 mr-2" /> Видалити</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* SERVICES TAB */}
           <TabsContent value="services">
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Layout className="w-5 h-5 text-rose-500" /> Services Section</CardTitle></CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={servicesForm.subtitle} onChange={(e) => handleServicesChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={servicesForm.title} onChange={(e) => handleServicesChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={servicesForm.description} onChange={(e) => handleServicesChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
-                <div className="flex justify-end">{renderSaveButton(handleSaveServices)}</div>
+            <Card className="bg-slate-900 border-slate-800 mb-6">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Layout className="w-5 h-5 text-rose-500" /> Заголовки сторінки "Послуги"</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2"><Label className="text-slate-300">Головний заголовок</Label><Input value={servicesForm.title} onChange={(e) => handleServicesChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Короткий опис сторінки</Label><Textarea value={servicesForm.description} onChange={(e) => handleServicesChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveServicesSection)}</div>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* TESTIMONIALS TAB */}
-          <TabsContent value="testimonials">
             <Card className="bg-slate-900 border-slate-800">
-              <CardHeader><CardTitle className="text-white flex items-center gap-2"><FileText className="w-5 h-5 text-rose-500" /> Testimonials Section</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-white">Картки послуг (Динамічні)</CardTitle><CardDescription className="text-slate-400">Додавайте та видаляйте послуги, які відображатимуться на сайті.</CardDescription></CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={testimonialsForm.subtitle} onChange={(e) => handleTestimonialsChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={testimonialsForm.title} onChange={(e) => handleTestimonialsChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={testimonialsForm.description} onChange={(e) => handleTestimonialsChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
-                <div className="flex justify-end">{renderSaveButton(handleSaveTestimonials)}</div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* CONTACT TAB */}
-          <TabsContent value="contact">
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Mail className="w-5 h-5 text-rose-500" /> Contact Section</CardTitle></CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={contactForm.subtitle} onChange={(e) => handleContactChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={contactForm.title} onChange={(e) => handleContactChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
-                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={contactForm.description} onChange={(e) => handleContactChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
-                <div className="flex justify-end">{renderSaveButton(handleSaveContact)}</div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* SETTINGS TAB */}
-          <TabsContent value="settings">
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Settings className="w-5 h-5 text-rose-500" /> Clinic Settings</CardTitle></CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Sparkles className="w-4 h-4" /> Clinic Name</Label><Input value={settingsForm.clinic_name} onChange={(e) => handleSettingsChange('clinic_name', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Phone className="w-4 h-4" /> Phone Number</Label><Input value={settingsForm.phone} onChange={(e) => handleSettingsChange('phone', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Mail className="w-4 h-4" /> Email Address</Label><Input value={settingsForm.email} onChange={(e) => handleSettingsChange('email', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Instagram className="w-4 h-4" /> Instagram</Label><Input value={settingsForm.instagram} onChange={(e) => handleSettingsChange('instagram', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                  <div className="space-y-2 md:col-span-2"><Label className="text-slate-300 flex items-center gap-2"><MapPin className="w-4 h-4" /> Address</Label><Input value={settingsForm.address} onChange={(e) => handleSettingsChange('address', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
-                  <div className="space-y-2 md:col-span-2"><Label className="text-slate-300 flex items-center gap-2"><Clock className="w-4 h-4" /> Working Hours</Label><Input value={settingsForm.working_hours} onChange={(e) => handleSettingsChange('working_hours', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-4">
+                  <h3 className="text-white font-medium">Додати нову послугу</h3>
+                  <Input placeholder="Назва послуги (напр. Контурна пластика)" value={newService.title} onChange={(e) => setNewService(prev => ({ ...prev, title: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" />
+                  <Textarea placeholder="Опис послуги" value={newService.description} onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))} className="bg-slate-900 border-slate-700 text-white h-24" />
+                  <Button onClick={handleAddService} disabled={isAddingService} className="bg-rose-500 hover:bg-rose-600 text-white w-full sm:w-auto"><Plus className="w-4 h-4 mr-2" /> Додати послугу</Button>
                 </div>
-                <Separator className="bg-slate-800" />
-                <div className="flex justify-end">{renderSaveButton(handleSaveSettings)}</div>
+                
+                <div className="space-y-3">
+                  {servicesList.length === 0 ? <p className="text-slate-500 text-sm">Немає доданих послуг.</p> : servicesList.map(item => (
+                    <div key={item.id} className="flex justify-between items-center p-4 bg-slate-800 rounded-xl border border-slate-700">
+                      <div><h4 className="text-white font-medium">{item.title}</h4><p className="text-slate-400 text-sm line-clamp-1">{item.description}</p></div>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteService(item.id)} className="text-red-400 hover:text-red-300 hover:bg-red-400/10 ml-4"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* PRICING TAB (NEW) */}
+          <TabsContent value="pricing">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><DollarSign className="w-5 h-5 text-amber-500" /> Прайс-лист</CardTitle><CardDescription className="text-slate-400">Керуйте цінами. Сайт автоматично згрупує їх за категоріями.</CardDescription></CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-4">
+                  <h3 className="text-white font-medium">Додати нову ціну</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label className="text-slate-300">Категорія (напр. Ін'єкції)</Label><Input placeholder="Категорія" value={newPricing.category} onChange={(e) => setNewPricing(prev => ({ ...prev, category: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" /></div>
+                    <div className="space-y-2"><Label className="text-slate-300">Ціна (напр. 4500 грн)</Label><Input placeholder="Ціна" value={newPricing.price} onChange={(e) => setNewPricing(prev => ({ ...prev, price: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" /></div>
+                    <div className="space-y-2 sm:col-span-2"><Label className="text-slate-300">Назва процедури</Label><Input placeholder="Збільшення губ (Stylage M)" value={newPricing.name} onChange={(e) => setNewPricing(prev => ({ ...prev, name: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" /></div>
+                  </div>
+                  <Button onClick={handleAddPricing} disabled={isAddingPricing} className="bg-amber-500 hover:bg-amber-600 text-white w-full sm:w-auto"><Plus className="w-4 h-4 mr-2" /> Додати в прайс</Button>
+                </div>
+
+                <div className="space-y-3">
+                  {pricingList.length === 0 ? <p className="text-slate-500 text-sm">Прайс порожній.</p> : pricingList.map(item => (
+                    <div key={item.id} className="flex justify-between items-center p-3 bg-slate-800 rounded-lg border border-slate-700">
+                      <div className="flex-1">
+                        <Badge variant="outline" className="mb-1 text-amber-500 border-amber-500/30">{item.category}</Badge>
+                        <h4 className="text-white text-sm font-medium">{item.name}</h4>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-white font-bold whitespace-nowrap">{item.price}</span>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeletePricing(item.id)} className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 w-8 p-0"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ABOUT, CONTACT & SETTINGS TABS */}
+          <TabsContent value="about"><Card className="bg-slate-900 border-slate-800"><CardHeader><CardTitle className="text-white">About Section</CardTitle></CardHeader><CardContent className="space-y-4"><Input value={aboutForm.title} onChange={e => handleAboutChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" /><Textarea value={aboutForm.description} onChange={e => handleAboutChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" /><div className="flex justify-end">{renderSaveButton(handleSaveAbout)}</div></CardContent></Card></TabsContent>
+          
+          <TabsContent value="contact"><Card className="bg-slate-900 border-slate-800"><CardHeader><CardTitle className="text-white">Contact Section</CardTitle></CardHeader><CardContent className="space-y-4"><Input value={contactForm.title} onChange={e => handleContactChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" /><Textarea value={contactForm.description} onChange={e => handleContactChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" /><div className="flex justify-end">{renderSaveButton(handleSaveContact)}</div></CardContent></Card></TabsContent>
+          
+          <TabsContent value="settings"><Card className="bg-slate-900 border-slate-800"><CardHeader><CardTitle className="text-white">Settings</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4"><Input value={settingsForm.phone} onChange={e => handleSettingsChange('phone', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Phone" /><Input value={settingsForm.instagram} onChange={e => handleSettingsChange('instagram', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Instagram link" /><Input value={settingsForm.address} onChange={e => handleSettingsChange('address', e.target.value)} className="bg-slate-800 border-slate-700 text-white col-span-2" placeholder="Address" /><Input value={settingsForm.working_hours} onChange={e => handleSettingsChange('working_hours', e.target.value)} className="bg-slate-800 border-slate-700 text-white col-span-2" placeholder="Working Hours" /><div className="col-span-2 flex justify-end">{renderSaveButton(handleSaveSettings)}</div></CardContent></Card></TabsContent>
+
         </Tabs>
       </main>
     </div>
