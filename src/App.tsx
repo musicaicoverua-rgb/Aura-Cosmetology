@@ -1,12 +1,6 @@
 // ============================================================================
 // MAIN APPLICATION - AURA COSMETOLOGY
 // ============================================================================
-// Complete web application with:
-// - React Router for navigation
-// - Authentication protection for admin routes
-// - Dynamic content from Supabase
-// - Premium GSAP animations
-// ============================================================================
 
 import React from 'react';
 import {
@@ -15,6 +9,8 @@ import {
   Route,
   Navigate,
   Outlet,
+  Link,
+  useLocation
 } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
@@ -30,7 +26,7 @@ import ContentEditor from '@/admin/pages/ContentEditor';
 import HeroSection from '@/sections/HeroSection';
 
 // =============================================================================
-// PROTECTED ROUTE COMPONENT
+// PROTECTED ROUTE (Для адмінки)
 // =============================================================================
 
 interface ProtectedRouteProps {
@@ -59,42 +55,177 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 };
 
 // =============================================================================
-// PUBLIC LAYOUT - MAIN WEBSITE
+// АНІМАЦІЯ ПЕРЕХОДІВ (Плавна поява сторінок)
+// =============================================================================
+const PageTransition: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} style={{ animation: 'fadeSlideUp 0.6s ease-out forwards' }} className="w-full">
+      <style>{`
+        @keyframes fadeSlideUp {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      {children}
+    </div>
+  );
+};
+
+// =============================================================================
+// ОКРЕМІ СТОРІНКИ САЙТУ
 // =============================================================================
 
-const PublicLayout: React.FC = () => {
-  const { getAboutContent, getServicesContent, getTestimonialsContent, getContactContent, settings } = useContent();
+// 1. Головна сторінка (Hero + Про нас)
+const HomePage: React.FC = () => {
+  const { getAboutContent } = useContent();
   const aboutData = getAboutContent();
+
+  return (
+    <PageTransition>
+      <HeroSection />
+      <section className="min-h-screen bg-slate-950 flex items-center justify-center py-20">
+        <div className="text-center max-w-4xl mx-auto px-4">
+          <h2 className="text-4xl font-bold text-white mb-4">
+            {aboutData?.title || 'Про нас'}
+          </h2>
+          <p className="text-slate-400">
+            {aboutData?.description || 'Завантаження опису...'}
+          </p>
+        </div>
+      </section>
+    </PageTransition>
+  );
+};
+
+// 2. Сторінка Послуг
+const ServicesPage: React.FC = () => {
+  const { getServicesContent } = useContent();
   const servicesData = getServicesContent();
-  const testimonialsData = getTestimonialsContent();
+
+  return (
+    <PageTransition>
+      <section className="min-h-screen bg-slate-900 flex flex-col items-center py-32">
+        <div className="text-center max-w-4xl mx-auto px-4">
+          <h1 className="text-4xl font-bold text-white mb-4 text-rose-500">
+            {servicesData?.title || 'Наші послуги'}
+          </h1>
+          <p className="text-slate-400 mb-12">
+            {servicesData?.description || 'Опис послуг завантажується...'}
+          </p>
+          <div className="p-8 border border-slate-800 rounded-2xl bg-slate-800/20 backdrop-blur-sm">
+             <p className="text-slate-500">Тут будуть картки послуг (Додамо на наступному кроці)</p>
+          </div>
+        </div>
+      </section>
+    </PageTransition>
+  );
+};
+
+// 3. Сторінка Галереї (Нова)
+const GalleryPage: React.FC = () => {
+  return (
+    <PageTransition>
+      <section className="min-h-screen bg-slate-950 flex flex-col items-center py-32">
+        <div className="text-center max-w-6xl mx-auto px-4 w-full">
+          <h1 className="text-4xl font-bold text-white mb-4 text-purple-500">
+            Галерея робіт
+          </h1>
+          <p className="text-slate-400 mb-12">
+            Результати нашої роботи до та після
+          </p>
+          <div className="p-8 border border-slate-800 rounded-2xl bg-slate-900/50">
+             <p className="text-slate-500">Тут буде сітка фотографій з бази даних</p>
+          </div>
+        </div>
+      </section>
+    </PageTransition>
+  );
+};
+
+// 4. Сторінка Прайсу (Нова)
+const PricingPage: React.FC = () => {
+  return (
+    <PageTransition>
+      <section className="min-h-screen bg-slate-900 flex flex-col items-center py-32">
+        <div className="text-center max-w-4xl mx-auto px-4 w-full">
+          <h1 className="text-4xl font-bold text-white mb-4 text-amber-500">
+            Прайс-лист
+          </h1>
+          <p className="text-slate-400 mb-12">
+            Прозорі ціни на всі процедури
+          </p>
+          <div className="p-8 border border-slate-800 rounded-2xl bg-slate-800/20">
+             <p className="text-slate-500">Тут буде таблиця цін</p>
+          </div>
+        </div>
+      </section>
+    </PageTransition>
+  );
+};
+
+// 5. Сторінка Контактів
+const ContactPage: React.FC = () => {
+  const { getContactContent, settings } = useContent();
   const contactData = getContactContent();
 
   return (
-    <div className="min-h-screen bg-slate-950 relative">
-      {/* Navigation */}
+    <PageTransition>
+      <section className="min-h-screen bg-slate-950 flex flex-col items-center py-32">
+        <div className="max-w-4xl w-full mx-auto px-4 text-center">
+          <h1 className="text-4xl font-bold text-white mb-4 text-blue-500">
+            {contactData?.title || 'Контакти'}
+          </h1>
+          <p className="text-slate-400 mb-12">
+            {contactData?.description || 'Зв’яжіться з нами зручним для вас способом'}
+          </p>
+
+          <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 max-w-lg mx-auto text-left backdrop-blur-sm">
+            <div className="space-y-6 text-slate-300 text-lg">
+              {settings?.phone && <p className="flex items-center gap-4">📞 <a href={`tel:${settings.phone}`} className="hover:text-rose-400 transition-colors">{settings.phone}</a></p>}
+              {settings?.email && <p className="flex items-center gap-4">✉️ <a href={`mailto:${settings.email}`} className="hover:text-rose-400 transition-colors">{settings.email}</a></p>}
+              {settings?.instagram && <p className="flex items-center gap-4">📸 <a href={settings.instagram.includes('http') ? settings.instagram : `https://instagram.com/${settings.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-rose-400 transition-colors">{settings.instagram}</a></p>}
+              {settings?.address && <p className="flex items-center gap-4">📍 <span>{settings.address}</span></p>}
+              {settings?.working_hours && <p className="flex items-center gap-4">🕒 <span>{settings.working_hours}</span></p>}
+            </div>
+          </div>
+        </div>
+      </section>
+    </PageTransition>
+  );
+};
+
+// =============================================================================
+// ГОЛОВНИЙ ШАБЛОН САЙТУ (Навігація + Підвал)
+// =============================================================================
+
+const PublicLayout: React.FC = () => {
+  const { settings } = useContent();
+
+  return (
+    <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-x-hidden">
+      {/* Меню */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <a href="/" className="flex items-center gap-2">
+            
+            <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
-              <span className="text-white font-semibold hidden sm:block">
-                Aura Cosmetology
-              </span>
-            </a>
+              <span className="text-white font-semibold hidden sm:block">Aura Cosmetology</span>
+            </Link>
 
-            {/* Nav Links */}
+            {/* Посилання навігації */}
             <div className="hidden md:flex items-center gap-8">
-              <a href="#hero" className="text-slate-400 hover:text-white transition-colors text-sm">Home</a>
-              <a href="#about" className="text-slate-400 hover:text-white transition-colors text-sm">About</a>
-              <a href="#services" className="text-slate-400 hover:text-white transition-colors text-sm">Services</a>
-              <a href="#testimonials" className="text-slate-400 hover:text-white transition-colors text-sm">Testimonials</a>
-              <a href="#contact" className="text-slate-400 hover:text-white transition-colors text-sm">Contact</a>
+              <Link to="/" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Головна</Link>
+              <Link to="/services" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Послуги</Link>
+              <Link to="/pricing" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Прайс</Link>
+              <Link to="/gallery" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Галерея</Link>
+              <Link to="/contact" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Контакти</Link>
             </div>
 
-            {/* CTA - Гаряча кнопка дзвінка */}
+            {/* Кнопка дзвінка */}
             <a
               href={`tel:${settings?.phone || '+38000000000'}`}
               className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-rose-500/25 transition-all flex items-center gap-2"
@@ -106,68 +237,13 @@ const PublicLayout: React.FC = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="pt-16">
-        <HeroSection />
-
-        <section id="about" className="min-h-screen bg-slate-950 flex items-center justify-center py-20">
-          <div className="text-center max-w-4xl mx-auto px-4">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              {aboutData?.title || 'Про нас'}
-            </h2>
-            <p className="text-slate-400">
-              {aboutData?.description || 'Завантаження опису...'}
-            </p>
-          </div>
-        </section>
-
-        <section id="services" className="min-h-screen bg-slate-900 flex items-center justify-center py-20">
-          <div className="text-center max-w-4xl mx-auto px-4">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              {servicesData?.title || 'Наші послуги'}
-            </h2>
-            <p className="text-slate-400">
-              {servicesData?.description || 'Опис послуг завантажується...'}
-            </p>
-          </div>
-        </section>
-
-        <section id="testimonials" className="min-h-screen bg-slate-950 flex items-center justify-center py-20">
-          <div className="text-center max-w-4xl mx-auto px-4">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              {testimonialsData?.title || 'Відгуки'}
-            </h2>
-            <p className="text-slate-400">
-              {testimonialsData?.description || 'Відгуки завантажуються...'}
-            </p>
-          </div>
-        </section>
-
-        <section id="contact" className="min-h-screen bg-slate-900 flex flex-col items-center justify-center py-20">
-          <div className="max-w-4xl w-full mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              {contactData?.title || 'Контакти'}
-            </h2>
-            <p className="text-slate-400 mb-12">
-              {contactData?.description || 'Зв’яжіться з нами зручним для вас способом'}
-            </p>
-
-            {/* Карточка з реальними контактами з адмінки */}
-            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 max-w-lg mx-auto text-left backdrop-blur-sm">
-              <div className="space-y-6 text-slate-300 text-lg">
-                {settings?.phone && <p className="flex items-center gap-4">📞 <a href={`tel:${settings.phone}`} className="hover:text-rose-400 transition-colors">{settings.phone}</a></p>}
-                {settings?.email && <p className="flex items-center gap-4">✉️ <a href={`mailto:${settings.email}`} className="hover:text-rose-400 transition-colors">{settings.email}</a></p>}
-                {settings?.instagram && <p className="flex items-center gap-4">📸 <a href={settings.instagram.includes('http') ? settings.instagram : `https://instagram.com/${settings.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-rose-400 transition-colors">{settings.instagram}</a></p>}
-                {settings?.address && <p className="flex items-center gap-4">📍 <span>{settings.address}</span></p>}
-                {settings?.working_hours && <p className="flex items-center gap-4">🕒 <span>{settings.working_hours}</span></p>}
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* ТУТ БУДУТЬ ВІДОБРАЖАТИСЯ НАШІ СТОРІНКИ */}
+      <main className="flex-grow pt-16">
+        <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-800 py-12">
+      {/* Підвал */}
+      <footer className="bg-slate-950 border-t border-slate-800 py-12 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -176,21 +252,15 @@ const PublicLayout: React.FC = () => {
               </div>
               <span className="text-white font-semibold">Aura Cosmetology</span>
             </div>
-
-            <p className="text-slate-500 text-sm">
-              © 2024 Aura Cosmetology. All rights reserved.
-            </p>
-
-            <a href="/admin/login" className="text-slate-500 hover:text-rose-400 text-sm transition-colors">
-              Admin Login
-            </a>
+            <p className="text-slate-500 text-sm">© 2024 Aura Cosmetology. All rights reserved.</p>
+            <Link to="/admin/login" className="text-slate-500 hover:text-rose-400 text-sm transition-colors">Admin Login</Link>
           </div>
         </div>
       </footer>
       
-      {/* Плаваюча кнопка чату (Instagram) */}
+      {/* Плаваюча кнопка Instagram */}
       <a
-        href="https://www.instagram.com/lux_cosmetologia?igsh=MWM2M2Zza215aWFpbQ==" 
+        href={settings?.instagram?.includes('http') ? settings.instagram : `https://instagram.com/${settings?.instagram?.replace('@', '')}`}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-tr from-yellow-400 via-rose-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(225,29,72,0.5)] hover:scale-110 transition-transform z-50"
@@ -202,19 +272,7 @@ const PublicLayout: React.FC = () => {
 };
 
 // =============================================================================
-// ADMIN LAYOUT
-// =============================================================================
-
-const AdminLayout: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-slate-950">
-      <Outlet />
-    </div>
-  );
-};
-
-// =============================================================================
-// MAIN APP COMPONENT
+// МАРШРУТИЗАЦІЯ (Роутинг)
 // =============================================================================
 
 const App: React.FC = () => {
@@ -223,39 +281,27 @@ const App: React.FC = () => {
       <ContentProvider>
         <Router>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<PublicLayout />} />
+            {/* Публічні сторінки сайту */}
+            <Route path="/" element={<PublicLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="services" element={<ServicesPage />} />
+              <Route path="pricing" element={<PricingPage />} />
+              <Route path="gallery" element={<GalleryPage />} />
+              <Route path="contact" element={<ContactPage />} />
+            </Route>
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
+            {/* Адмінка */}
+            <Route path="/admin" element={<div className="min-h-screen bg-slate-950"><Outlet /></div>}>
               <Route path="login" element={<AdminLogin />} />
-              <Route
-                path="dashboard"
-                element={
-                  <ProtectedRoute>
-                    <ContentEditor />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="dashboard" element={<ProtectedRoute><ContentEditor /></ProtectedRoute>} />
               <Route index element={<Navigate to="login" replace />} />
             </Route>
 
-            {/* 404 Redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
 
-        {/* Toast notifications */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: '#1e293b',
-              color: '#fff',
-              border: '1px solid #334155',
-            },
-          }}
-        />
+        <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#fff', border: '1px solid #334155' } }} />
       </ContentProvider>
     </AuthProvider>
   );
