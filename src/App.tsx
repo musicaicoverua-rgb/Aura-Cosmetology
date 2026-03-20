@@ -64,11 +64,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 // =============================================================================
 
 const PublicLayout: React.FC = () => {
-  const { getAboutContent, getServicesContent, getTestimonialsContent, getContactContent } = useContent();
+    const { getAboutContent, getServicesContent, getTestimonialsContent, getContactContent, settings } = useContent();
   const aboutData = getAboutContent();
   const servicesData = getServicesContent();
   const testimonialsData = getTestimonialsContent();
-const contactData = getContactContent();
+  const contactData = getContactContent();
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Navigation */}
@@ -119,15 +119,7 @@ const contactData = getContactContent();
               </a>
             </div>
 
-                        {/* CTA - Гаряча кнопка дзвінка */}
-            <a
-              href="tel:+34623596696" /* +34623596696 */
-              className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-rose-500/25 transition-all flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-              Подзвонити
-            </a>
-
+                        
       {/* Main Content */}
       <main className="pt-16">
         <HeroSection />
@@ -151,7 +143,17 @@ const contactData = getContactContent();
           id="services"
           className="min-h-screen bg-slate-900 flex items-center justify-center"
         >
-          <div className="text-center">
+          <div className="text-cente            
+            
+                {/* CTA - Гаряча кнопка дзвінка */}
+            <a
+              href={`tel:${settings?.phone || '+38000000000'}`}
+              className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-rose-500/25 transition-all flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              Подзвонити
+            </a>
+r">
             <h2 className="text-4xl font-bold text-white mb-4">
   {servicesData?.title || 'Наші послуги'}
 </h2>
@@ -161,21 +163,31 @@ const contactData = getContactContent();
           </div>
         </section>
 
-        <section
-          id="testimonials"
-          className="min-h-screen bg-slate-950 flex items-center justify-center"
+                <section
+          id="contact"
+          className="min-h-screen bg-slate-900 flex flex-col items-center justify-center py-20"
         >
-          <div className="text-center">
-           <h2 className="text-4xl font-bold text-white mb-4">
-  {testimonialsData?.title || 'Відгуки'}
-</h2>
-<p className="text-slate-400">
-  {testimonialsData?.description || 'Відгуки завантажуються...'}
-</p>
+          <div className="max-w-4xl w-full mx-auto px-4 text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              {contactData?.title || 'Контакти'}
+            </h2>
+            <p className="text-slate-400 mb-12">
+              {contactData?.description || 'Зв’яжіться з нами зручним для вас способом'}
+            </p>
+
+            {/* Карточка з реальними контактами з адмінки */}
+            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 max-w-lg mx-auto text-left backdrop-blur-sm">
+              <div className="space-y-6 text-slate-300 text-lg">
+                {settings?.phone && <p className="flex items-center gap-4">📞 <span>{settings.phone}</span></p>}
+                {settings?.email && <p className="flex items-center gap-4">✉️ <span>{settings.email}</span></p>}
+                {settings?.instagram && <p className="flex items-center gap-4">📸 <span>{settings.instagram}</span></p>}
+                {settings?.address && <p className="flex items-center gap-4">📍 <span>{settings.address}</span></p>}
+                {settings?.working_hours && <p className="flex items-center gap-4">🕒 <span>{settings.working_hours}</span></p>}
+              </div>
+            </div>
           </div>
         </section>
 
-        <section
           id="contact"
           className="min-h-screen bg-slate-900 flex items-center justify-center"
         >
@@ -214,6 +226,16 @@ const contactData = getContactContent();
           </div>
         </div>
       </footer>
+           {/* Плаваюча кнопка чату (Telegram) */}
+      <a
+        href="https://t.me/твій_нік" 
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:scale-110 transition-transform z-50"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </a>
+      
     </div>
   );
 };
