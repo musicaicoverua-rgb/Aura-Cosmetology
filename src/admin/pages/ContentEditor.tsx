@@ -1,5 +1,5 @@
 // ============================================================================
-// CONTENT EDITOR - ADMIN DASHBOARD (FINAL WITH DYNAMIC SERVICES & PRICING)
+// CONTENT EDITOR - ADMIN DASHBOARD
 // ============================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -34,7 +34,7 @@ const ContentEditor: React.FC = () => {
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
 
-  // Стейт для Послуг (Динамічні картки)
+  // Стейт для Послуг
   const [servicesList, setServicesList] = useState<any[]>([]);
   const [newService, setNewService] = useState({ title: '', description: '' });
   const [isAddingService, setIsAddingService] = useState(false);
@@ -68,7 +68,6 @@ const ContentEditor: React.FC = () => {
     const testimonials = getTestimonialsContent(); if (testimonials) setTestimonialsForm({ title: testimonials.title, subtitle: testimonials.subtitle, description: testimonials.description });
   }, [siteContent, getHeroContent, getAboutContent, getServicesContent, getContactContent, getTestimonialsContent]);
 
-  // Завантаження Галереї, Послуг і Прайсу
   useEffect(() => {
     const fetchData = async () => {
       const [galRes, srvRes, prcRes] = await Promise.all([
@@ -91,6 +90,7 @@ const ContentEditor: React.FC = () => {
   const handleSaveServicesSection = async () => { try { await updateContent('services', servicesForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleSaveContact = async () => { try { await updateContent('contact', contactForm); setHasUnsavedChanges(false); } catch (err) {} };
   const handleSaveTestimonials = async () => { try { await updateContent('testimonials', testimonialsForm); setHasUnsavedChanges(false); } catch (err) {} };
+  
   const handleRefresh = async () => { await refreshContent(); setHasUnsavedChanges(false); };
 
   const handleSettingsChange = (field: string, value: string) => { setSettingsForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
@@ -100,14 +100,13 @@ const ContentEditor: React.FC = () => {
   const handleContactChange = (field: string, value: string) => { setContactForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
   const handleTestimonialsChange = (field: string, value: string) => { setTestimonialsForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
 
-  // --- HANDLERS FOR DYNAMIC DATA ---
   const handleAddService = async () => {
-    if (!newService.title) return toast.error('Назва послуги обов\'язкова');
+    if (!newService.title) return toast.error('Назва обов\'язкова');
     setIsAddingService(true);
     try {
-      const { data, error } = await supabase.from('services_items').insert([newService]).select();
-      if (error) throw error;
-      setServicesList(prev => [...prev, data[0]]);
+      const { data, error: err } = await supabase.from('services_items').insert([newService]).select();
+      if (err) throw err;
+      if (data) setServicesList(prev => [...prev, data[0]]);
       setNewService({ title: '', description: '' });
       toast.success('Послугу додано');
     } catch (err: any) { toast.error(err.message); } finally { setIsAddingService(false); }
@@ -116,8 +115,8 @@ const ContentEditor: React.FC = () => {
   const handleDeleteService = async (id: string) => {
     if (!window.confirm('Видалити послугу?')) return;
     try {
-      const { error } = await supabase.from('services_items').delete().eq('id', id);
-      if (error) throw error;
+      const { error: err } = await supabase.from('services_items').delete().eq('id', id);
+      if (err) throw err;
       setServicesList(prev => prev.filter(item => item.id !== id));
       toast.success('Послугу видалено');
     } catch (err: any) { toast.error(err.message); }
@@ -127,10 +126,10 @@ const ContentEditor: React.FC = () => {
     if (!newPricing.category || !newPricing.name || !newPricing.price) return toast.error('Всі поля обов\'язкові');
     setIsAddingPricing(true);
     try {
-      const { data, error } = await supabase.from('pricing_items').insert([newPricing]).select();
-      if (error) throw error;
-      setPricingList(prev => [...prev, data[0]]);
-      setNewPricing({ category: newPricing.category, name: '', price: '' }); // Залишаємо категорію для зручності
+      const { data, error: err } = await supabase.from('pricing_items').insert([newPricing]).select();
+      if (err) throw err;
+      if (data) setPricingList(prev => [...prev, data[0]]);
+      setNewPricing({ category: newPricing.category, name: '', price: '' }); 
       toast.success('Ціну додано');
     } catch (err: any) { toast.error(err.message); } finally { setIsAddingPricing(false); }
   };
@@ -138,8 +137,8 @@ const ContentEditor: React.FC = () => {
   const handleDeletePricing = async (id: string) => {
     if (!window.confirm('Видалити ціну?')) return;
     try {
-      const { error } = await supabase.from('pricing_items').delete().eq('id', id);
-      if (error) throw error;
+      const { error: err } = await supabase.from('pricing_items').delete().eq('id', id);
+      if (err) throw err;
       setPricingList(prev => prev.filter(item => item.id !== id));
       toast.success('Ціну видалено');
     } catch (err: any) { toast.error(err.message); }
@@ -163,6 +162,7 @@ const ContentEditor: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             {hasUnsavedChanges && <Badge variant="outline" className="border-amber-500/50 text-amber-400"><AlertCircle className="w-3 h-3 mr-1" /> Unsaved</Badge>}
+            <Button variant="outline" size="sm" onClick={handleRefresh} className="border-slate-700 text-slate-300 hidden sm:flex"><RefreshCw className="w-4 h-4 mr-2" /> Refresh</Button>
             <a href="/" target="_blank" rel="noopener noreferrer"><Button variant="outline" size="sm" className="border-slate-700 text-slate-300"><Layout className="w-4 h-4 mr-2" /> Site</Button></a>
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400"><LogOut className="w-4 h-4" /></Button>
           </div>
@@ -170,6 +170,13 @@ const ContentEditor: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {error && (
+          <Alert className="mb-6 bg-red-500/10 border-red-500/30 text-red-400">
+            <AlertCircle className="w-4 h-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-slate-900 border border-slate-800 p-1 flex flex-wrap h-auto gap-1">
             <TabsTrigger value="hero" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Sparkles className="w-4 h-4 mr-2 hidden sm:block" /> Hero</TabsTrigger>
@@ -177,11 +184,11 @@ const ContentEditor: React.FC = () => {
             <TabsTrigger value="services" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Layout className="w-4 h-4 mr-2 hidden sm:block" /> Послуги</TabsTrigger>
             <TabsTrigger value="pricing" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white"><DollarSign className="w-4 h-4 mr-2 hidden sm:block" /> Прайс</TabsTrigger>
             <TabsTrigger value="about" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Type className="w-4 h-4 mr-2 hidden sm:block" /> About</TabsTrigger>
-            <TabsTrigger value="contact" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Mail className="w-4 h-4 mr-2 hidden sm:block" /> Contact</TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Settings className="w-4 h-4 mr-2 hidden sm:block" /> Settings</TabsTrigger>
+            <TabsTrigger value="testimonials" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><FileText className="w-4 h-4 mr-2 hidden sm:block" /> Відгуки</TabsTrigger>
+            <TabsTrigger value="contact" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Mail className="w-4 h-4 mr-2 hidden sm:block" /> Контакти</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Settings className="w-4 h-4 mr-2 hidden sm:block" /> Налаштування</TabsTrigger>
           </TabsList>
 
-          {/* HERO TAB */}
           <TabsContent value="hero">
             <Card className="bg-slate-900 border-slate-800">
               <CardHeader><CardTitle className="text-white flex items-center gap-2"><Sparkles className="w-5 h-5 text-rose-500" /> Hero Section</CardTitle></CardHeader>
@@ -193,7 +200,7 @@ const ContentEditor: React.FC = () => {
                   <Label className="text-slate-300">Hero Image</Label>
                   <Input type="file" accept="image/*" className="bg-slate-800 border-slate-700 text-slate-300" onChange={async (e) => {
                     const file = e.target.files?.[0]; if (!file) return;
-                    try { const loadingToast = toast.loading('Uploading...'); const imageUrl = await uploadImage(file); handleHeroChange('image_url', imageUrl); toast.dismiss(loadingToast); toast.success('Image uploaded!'); } catch (err) { toast.error('Failed to upload'); }
+                    try { const loadingToast = toast.loading('Uploading...'); const imageUrl = await uploadImage(file); handleHeroChange('image_url', imageUrl); toast.dismiss(loadingToast); toast.success('Image uploaded!'); } catch { toast.error('Failed to upload'); }
                   }} />
                   {heroForm.image_url && <div className="mt-4 w-40 h-40 rounded-xl overflow-hidden border border-slate-700"><img src={heroForm.image_url} alt="Preview" className="object-cover w-full h-full" /></div>}
                 </div>
@@ -202,7 +209,6 @@ const ContentEditor: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* GALLERY TAB */}
           <TabsContent value="gallery">
             <Card className="bg-slate-900 border-slate-800">
               <CardHeader><CardTitle className="text-white flex items-center gap-2"><ImageIcon className="w-5 h-5 text-purple-500" /> Галерея робіт</CardTitle></CardHeader>
@@ -213,7 +219,7 @@ const ContentEditor: React.FC = () => {
                     <Button disabled={isUploadingGallery} className="bg-purple-600 hover:bg-purple-700 text-white px-8">{isUploadingGallery ? 'Завантаження...' : 'Вибрати фото'}</Button>
                     <Input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={isUploadingGallery} onChange={async (e) => {
                       const file = e.target.files?.[0]; if (!file) return;
-                      try { setIsUploadingGallery(true); const loadingToast = toast.loading('Завантажуємо...'); const imageUrl = await uploadImage(file); await supabase.from('gallery').insert([{ image_url: imageUrl, title: 'Робота' }]); const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false }); if (data) setGalleryImages(data); toast.dismiss(loadingToast); toast.success('Додано!'); } catch (err) { toast.error('Помилка'); } finally { setIsUploadingGallery(false); e.target.value = ''; }
+                      try { setIsUploadingGallery(true); const loadingToast = toast.loading('Завантажуємо...'); const imageUrl = await uploadImage(file); await supabase.from('gallery').insert([{ image_url: imageUrl, title: 'Робота' }]); const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false }); if (data) setGalleryImages(data); toast.dismiss(loadingToast); toast.success('Додано!'); } catch { toast.error('Помилка'); } finally { setIsUploadingGallery(false); e.target.value = ''; }
                     }} />
                   </div>
                 </div>
@@ -235,7 +241,6 @@ const ContentEditor: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* SERVICES TAB */}
           <TabsContent value="services">
             <Card className="bg-slate-900 border-slate-800 mb-6">
               <CardHeader><CardTitle className="text-white flex items-center gap-2"><Layout className="w-5 h-5 text-rose-500" /> Заголовки сторінки "Послуги"</CardTitle></CardHeader>
@@ -268,7 +273,6 @@ const ContentEditor: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* PRICING TAB (NEW) */}
           <TabsContent value="pricing">
             <Card className="bg-slate-900 border-slate-800">
               <CardHeader><CardTitle className="text-white flex items-center gap-2"><DollarSign className="w-5 h-5 text-amber-500" /> Прайс-лист</CardTitle><CardDescription className="text-slate-400">Керуйте цінами. Сайт автоматично згрупує їх за категоріями.</CardDescription></CardHeader>
@@ -301,12 +305,57 @@ const ContentEditor: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* ABOUT, CONTACT & SETTINGS TABS */}
-          <TabsContent value="about"><Card className="bg-slate-900 border-slate-800"><CardHeader><CardTitle className="text-white">About Section</CardTitle></CardHeader><CardContent className="space-y-4"><Input value={aboutForm.title} onChange={e => handleAboutChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" /><Textarea value={aboutForm.description} onChange={e => handleAboutChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" /><div className="flex justify-end">{renderSaveButton(handleSaveAbout)}</div></CardContent></Card></TabsContent>
+          <TabsContent value="about">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Type className="w-5 h-5 text-rose-500" /> About Section</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Label className="text-slate-300">Title</Label>
+                <Input value={aboutForm.title} onChange={e => handleAboutChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" />
+                <Label className="text-slate-300">Description</Label>
+                <Textarea value={aboutForm.description} onChange={e => handleAboutChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" />
+                <div className="flex justify-end">{renderSaveButton(handleSaveAbout)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="testimonials">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><FileText className="w-5 h-5 text-rose-500" /> Testimonials Section</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Label className="text-slate-300">Title</Label>
+                <Input value={testimonialsForm.title} onChange={e => handleTestimonialsChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" />
+                <Label className="text-slate-300">Description</Label>
+                <Textarea value={testimonialsForm.description} onChange={e => handleTestimonialsChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" />
+                <div className="flex justify-end">{renderSaveButton(handleSaveTestimonials)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-          <TabsContent value="contact"><Card className="bg-slate-900 border-slate-800"><CardHeader><CardTitle className="text-white">Contact Section</CardTitle></CardHeader><CardContent className="space-y-4"><Input value={contactForm.title} onChange={e => handleContactChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" /><Textarea value={contactForm.description} onChange={e => handleContactChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" /><div className="flex justify-end">{renderSaveButton(handleSaveContact)}</div></CardContent></Card></TabsContent>
+          <TabsContent value="contact">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Mail className="w-5 h-5 text-rose-500" /> Contact Section</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Label className="text-slate-300">Title</Label>
+                <Input value={contactForm.title} onChange={e => handleContactChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" />
+                <Label className="text-slate-300">Description</Label>
+                <Textarea value={contactForm.description} onChange={e => handleContactChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" />
+                <div className="flex justify-end">{renderSaveButton(handleSaveContact)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
-          <TabsContent value="settings"><Card className="bg-slate-900 border-slate-800"><CardHeader><CardTitle className="text-white">Settings</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4"><Input value={settingsForm.phone} onChange={e => handleSettingsChange('phone', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Phone" /><Input value={settingsForm.instagram} onChange={e => handleSettingsChange('instagram', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Instagram link" /><Input value={settingsForm.address} onChange={e => handleSettingsChange('address', e.target.value)} className="bg-slate-800 border-slate-700 text-white col-span-2" placeholder="Address" /><Input value={settingsForm.working_hours} onChange={e => handleSettingsChange('working_hours', e.target.value)} className="bg-slate-800 border-slate-700 text-white col-span-2" placeholder="Working Hours" /><div className="col-span-2 flex justify-end">{renderSaveButton(handleSaveSettings)}</div></CardContent></Card></TabsContent>
+          <TabsContent value="settings">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Settings className="w-5 h-5 text-rose-500" /> Settings</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Phone className="w-4 h-4" /> Phone</Label><Input value={settingsForm.phone} onChange={e => handleSettingsChange('phone', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Phone" /></div>
+                <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Instagram className="w-4 h-4" /> Instagram</Label><Input value={settingsForm.instagram} onChange={e => handleSettingsChange('instagram', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Instagram link" /></div>
+                <div className="space-y-2 col-span-2"><Label className="text-slate-300 flex items-center gap-2"><MapPin className="w-4 h-4" /> Address</Label><Input value={settingsForm.address} onChange={e => handleSettingsChange('address', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Address" /></div>
+                <div className="space-y-2 col-span-2"><Label className="text-slate-300 flex items-center gap-2"><Clock className="w-4 h-4" /> Working Hours</Label><Input value={settingsForm.working_hours} onChange={e => handleSettingsChange('working_hours', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Working Hours" /></div>
+                <div className="col-span-2 flex justify-end">{renderSaveButton(handleSaveSettings)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
         </Tabs>
       </main>
