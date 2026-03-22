@@ -1,7 +1,3 @@
-// ============================================================================
-// CONTENT EDITOR - ADMIN DASHBOARD
-// ============================================================================
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -30,21 +26,15 @@ const ContentEditor: React.FC = () => {
   const [activeTab, setActiveTab] = useState('hero');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Стейт для Галереї
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
-
-  // Стейт для Послуг
   const [servicesList, setServicesList] = useState<any[]>([]);
   const [newService, setNewService] = useState({ title: '', description: '' });
   const [isAddingService, setIsAddingService] = useState(false);
-
-  // Стейт для Прайсу
   const [pricingList, setPricingList] = useState<any[]>([]);
   const [newPricing, setNewPricing] = useState({ category: '', name: '', price: '' });
   const [isAddingPricing, setIsAddingPricing] = useState(false);
 
-  // Стейт для форм
   const [settingsForm, setSettingsForm] = useState({ clinic_name: '', phone: '', email: '', instagram: '', address: '', working_hours: '' });
   const [heroForm, setHeroForm] = useState({ title: '', subtitle: '', description: '', image_url: '' });
   const [aboutForm, setAboutForm] = useState({ title: '', subtitle: '', description: '' });
@@ -235,4 +225,174 @@ const ContentEditor: React.FC = () => {
             <Card className="bg-slate-900 border-slate-800">
               <CardHeader><CardTitle className="text-white flex items-center gap-2"><Sparkles className="w-5 h-5 text-rose-500" /> Hero Section</CardTitle></CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={heroForm.subtitle} onChange={(e) => handleHeroChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white"
+                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={heroForm.subtitle} onChange={(e) => handleHeroChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={heroForm.title} onChange={(e) => handleHeroChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={heroForm.description} onChange={(e) => handleHeroChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
+                <div className="space-y-2 pt-4 border-t border-slate-800">
+                  <Label className="text-slate-300">Hero Image</Label>
+                  <Input type="file" accept="image/*" className="bg-slate-800 border-slate-700 text-slate-300" onChange={async (e) => {
+                    const file = e.target.files?.[0]; if (!file) return;
+                    try { const loadingToast = toast.loading('Uploading...'); const imageUrl = await uploadImage(file); handleHeroChange('image_url', imageUrl); toast.dismiss(loadingToast); toast.success('Image uploaded!'); } catch (err) { console.error(err); toast.error('Failed to upload'); }
+                  }} />
+                  {heroForm.image_url && <div className="mt-4 w-40 h-40 rounded-xl overflow-hidden border border-slate-700"><img src={heroForm.image_url} alt="Preview" className="object-cover w-full h-full" /></div>}
+                </div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveHero)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gallery">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><ImageIcon className="w-5 h-5 text-purple-500" /> Галерея робіт</CardTitle></CardHeader>
+              <CardContent className="space-y-8">
+                <div className="p-8 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/30 flex flex-col items-center">
+                  <Upload className="w-10 h-10 text-slate-400 mb-4" />
+                  <div className="relative inline-block">
+                    <Button disabled={isUploadingGallery} className="bg-purple-600 hover:bg-purple-700 text-white px-8">{isUploadingGallery ? 'Завантаження...' : 'Вибрати фото'}</Button>
+                    <Input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={isUploadingGallery} onChange={async (e) => {
+                      const file = e.target.files?.[0]; if (!file) return;
+                      try { setIsUploadingGallery(true); const loadingToast = toast.loading('Завантажуємо...'); const imageUrl = await uploadImage(file); await supabase.from('gallery').insert([{ image_url: imageUrl, title: 'Робота' }]); const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false }); if (data) setGalleryImages(data); toast.dismiss(loadingToast); toast.success('Додано!'); } catch (err) { console.error(err); toast.error('Помилка'); } finally { setIsUploadingGallery(false); e.target.value = ''; }
+                    }} />
+                  </div>
+                </div>
+                <Separator className="bg-slate-800" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {galleryImages.map((img) => (
+                    <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-700 aspect-square">
+                      <img src={img.image_url} alt="Gallery" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="destructive" size="sm" onClick={async () => {
+                          if (!window.confirm('Видалити?')) return;
+                          await supabase.from('gallery').delete().eq('id', img.id); setGalleryImages(prev => prev.filter(p => p.id !== img.id));
+                        }}><Trash2 className="w-4 h-4 mr-2" /> Видалити</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="services">
+            <Card className="bg-slate-900 border-slate-800 mb-6">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Layout className="w-5 h-5 text-rose-500" /> Заголовки сторінки "Послуги"</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2"><Label className="text-slate-300">Головний заголовок</Label><Input value={servicesForm.title} onChange={(e) => handleServicesChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Короткий опис сторінки</Label><Textarea value={servicesForm.description} onChange={(e) => handleServicesChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveServicesSection)}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white">Картки послуг (Динамічні)</CardTitle><CardDescription className="text-slate-400">Додавайте та видаляйте послуги, які відображатимуться на сайті.</CardDescription></CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-4">
+                  <h3 className="text-white font-medium">Додати нову послугу</h3>
+                  <Input placeholder="Назва послуги (напр. Контурна пластика)" value={newService.title} onChange={(e) => setNewService(prev => ({ ...prev, title: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" />
+                  <Textarea placeholder="Опис послуги" value={newService.description} onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))} className="bg-slate-900 border-slate-700 text-white h-24" />
+                  <Button onClick={handleAddService} disabled={isAddingService} className="bg-rose-500 hover:bg-rose-600 text-white w-full sm:w-auto"><Plus className="w-4 h-4 mr-2" /> Додати послугу</Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {servicesList.length === 0 ? <p className="text-slate-500 text-sm">Немає доданих послуг.</p> : servicesList.map(item => (
+                    <div key={item.id} className="flex justify-between items-center p-4 bg-slate-800 rounded-xl border border-slate-700">
+                      <div><h4 className="text-white font-medium">{item.title}</h4><p className="text-slate-400 text-sm line-clamp-1">{item.description}</p></div>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteService(item.id)} className="text-red-400 hover:text-red-300 hover:bg-red-400/10 ml-4"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pricing">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><DollarSign className="w-5 h-5 text-amber-500" /> Прайс-лист</CardTitle><CardDescription className="text-slate-400">Керуйте цінами. Сайт автоматично згрупує їх за категоріями.</CardDescription></CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-4">
+                  <h3 className="text-white font-medium">Додати нову ціну</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label className="text-slate-300">Категорія (напр. Ін'єкції)</Label><Input placeholder="Категорія" value={newPricing.category} onChange={(e) => setNewPricing(prev => ({ ...prev, category: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" /></div>
+                    <div className="space-y-2"><Label className="text-slate-300">Ціна (напр. 4500 грн)</Label><Input placeholder="Ціна" value={newPricing.price} onChange={(e) => setNewPricing(prev => ({ ...prev, price: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" /></div>
+                    <div className="space-y-2 sm:col-span-2"><Label className="text-slate-300">Назва процедури</Label><Input placeholder="Збільшення губ (Stylage M)" value={newPricing.name} onChange={(e) => setNewPricing(prev => ({ ...prev, name: e.target.value }))} className="bg-slate-900 border-slate-700 text-white" /></div>
+                  </div>
+                  <Button onClick={handleAddPricing} disabled={isAddingPricing} className="bg-amber-500 hover:bg-amber-600 text-white w-full sm:w-auto"><Plus className="w-4 h-4 mr-2" /> Додати в прайс</Button>
+                </div>
+
+                <div className="space-y-3">
+                  {pricingList.length === 0 ? <p className="text-slate-500 text-sm">Прайс порожній.</p> : pricingList.map(item => (
+                    <div key={item.id} className="flex justify-between items-center p-3 bg-slate-800 rounded-lg border border-slate-700">
+                      <div className="flex-1">
+                        <Badge variant="outline" className="mb-1 text-amber-500 border-amber-500/30">{item.category}</Badge>
+                        <h4 className="text-white text-sm font-medium">{item.name}</h4>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-white font-bold whitespace-nowrap">{item.price}</span>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeletePricing(item.id)} className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 w-8 p-0"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="about">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Type className="w-5 h-5 text-rose-500" /> Про нас</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Label className="text-slate-300">Title</Label>
+                <Input value={aboutForm.title} onChange={e => handleAboutChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" />
+                <Label className="text-slate-300">Description</Label>
+                <Textarea value={aboutForm.description} onChange={e => handleAboutChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" />
+                <div className="flex justify-end">{renderSaveButton(handleSaveAbout)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="testimonials">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><FileText className="w-5 h-5 text-rose-500" /> Відгуки</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Label className="text-slate-300">Title</Label>
+                <Input value={testimonialsForm.title} onChange={e => handleTestimonialsChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" />
+                <Label className="text-slate-300">Description</Label>
+                <Textarea value={testimonialsForm.description} onChange={e => handleTestimonialsChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" />
+                <div className="flex justify-end">{renderSaveButton(handleSaveTestimonials)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="contact">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Mail className="w-5 h-5 text-rose-500" /> Контакти</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Label className="text-slate-300">Title</Label>
+                <Input value={contactForm.title} onChange={e => handleContactChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Title" />
+                <Label className="text-slate-300">Description</Label>
+                <Textarea value={contactForm.description} onChange={e => handleContactChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white h-32" placeholder="Description" />
+                <div className="flex justify-end">{renderSaveButton(handleSaveContact)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Settings className="w-5 h-5 text-rose-500" /> Налаштування</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Phone className="w-4 h-4" /> Phone</Label><Input value={settingsForm.phone} onChange={e => handleSettingsChange('phone', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Phone" /></div>
+                <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Instagram className="w-4 h-4" /> Instagram</Label><Input value={settingsForm.instagram} onChange={e => handleSettingsChange('instagram', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Instagram link" /></div>
+                <div className="space-y-2 col-span-2"><Label className="text-slate-300 flex items-center gap-2"><MapPin className="w-4 h-4" /> Address</Label><Input value={settingsForm.address} onChange={e => handleSettingsChange('address', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Address" /></div>
+                <div className="space-y-2 col-span-2"><Label className="text-slate-300 flex items-center gap-2"><Clock className="w-4 h-4" /> Working Hours</Label><Input value={settingsForm.working_hours} onChange={e => handleSettingsChange('working_hours', e.target.value)} className="bg-slate-800 border-slate-700 text-white" placeholder="Working Hours" /></div>
+                <div className="col-span-2 flex justify-end">{renderSaveButton(handleSaveSettings)}</div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+        </Tabs>
+      </main>
+    </div>
+  );
+};
+
+export default ContentEditor;
