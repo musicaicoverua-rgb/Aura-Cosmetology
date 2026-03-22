@@ -1,362 +1,1053 @@
 // ============================================================================
-// MAIN APPLICATION - AURA COSMETOLOGY
+// CONTENT EDITOR - ADMIN DASHBOARD
+// ============================================================================
+// Dynamic CMS interface for editing all website content
+// Implements pessimistic UI updates with strict error handling
+// Shows success toast ONLY after database confirms the update
 // ============================================================================
 
-import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-  Link,
-  useLocation
-} from 'react-router-dom';
-import { Toaster } from 'sonner';
-import supabase from '@/lib/supabase';
-
-// Contexts
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { useContent, ContentProvider } from '@/contexts/ContentContext';
-
-// Admin Pages
-import AdminLogin from '@/admin/pages/AdminLogin';
-import ContentEditor from '@/admin/pages/ContentEditor';
-
-// Public Sections
-import HeroSection from '@/sections/HeroSection';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+@@ -23,11 +19,14 @@ import {
+MapPin,
+Instagram,
+Clock,
+  Image as ImageIcon,
+  Trash2,
+  Upload
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useContent } from '@/contexts/ContentContext';
+import { uploadImage } from '@/lib/supabase';
+import supabase, { uploadImage } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+@@ -38,10 +37,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 // =============================================================================
-// PROTECTED ROUTE
+// COMPONENT
 // =============================================================================
 
-interface ProtectedRouteProps {
-  children?: React.ReactNode;
+const ContentEditor: React.FC = () => {
+const navigate = useNavigate();
+const { user, signOut, isAuthenticated, isLoading: authLoading } = useAuth();
+@@ -61,140 +56,58 @@ const ContentEditor: React.FC = () => {
+getTestimonialsContent,
+} = useContent();
+
+  // ---------------------------------------------------------------------------
+  // LOCAL STATE FOR FORM FIELDS
+  // ---------------------------------------------------------------------------
+const [activeTab, setActiveTab] = useState('hero');
+const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Settings form state
+  const [settingsForm, setSettingsForm] = useState({
+    clinic_name: '',
+    phone: '',
+    email: '',
+    instagram: '',
+    address: '',
+    working_hours: '',
+  });
+  // Стейт для Галереї
+  const [galleryImages, setGalleryImages] = useState<any[]>([]);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+
+  // Hero section form state
+  const [heroForm, setHeroForm] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+  });
+
+  // About section form state
+  const [aboutForm, setAboutForm] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+  });
+
+  // Services section form state
+  const [servicesForm, setServicesForm] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+  });
+
+  // Contact section form state
+  const [contactForm, setContactForm] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+  });
+
+  // Testimonials section form state
+  const [testimonialsForm, setTestimonialsForm] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+  // Form states
+  const [settingsForm, setSettingsForm] = useState({
+    clinic_name: '', phone: '', email: '', instagram: '', address: '', working_hours: '',
+});
+  const [heroForm, setHeroForm] = useState({ title: '', subtitle: '', description: '', image_url: '' });
+  const [aboutForm, setAboutForm] = useState({ title: '', subtitle: '', description: '' });
+  const [servicesForm, setServicesForm] = useState({ title: '', subtitle: '', description: '' });
+  const [contactForm, setContactForm] = useState({ title: '', subtitle: '', description: '' });
+  const [testimonialsForm, setTestimonialsForm] = useState({ title: '', subtitle: '', description: '' });
+
+  // ---------------------------------------------------------------------------
+  // AUTH CHECK - Redirect if not authenticated
+  // ---------------------------------------------------------------------------
+  // Auth & Data loading
+useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/admin/login');
+    }
+    if (!authLoading && !isAuthenticated) navigate('/admin/login');
+}, [isAuthenticated, authLoading, navigate]);
+
+  // ---------------------------------------------------------------------------
+  // INITIALIZE FORM VALUES FROM DATABASE
+  // ---------------------------------------------------------------------------
+useEffect(() => {
+if (settings) {
+setSettingsForm({
+        clinic_name: settings.clinic_name,
+        phone: settings.phone,
+        email: settings.email,
+        instagram: settings.instagram,
+        address: settings.address,
+        working_hours: settings.working_hours,
+        clinic_name: settings.clinic_name || '', phone: settings.phone || '', email: settings.email || '',
+        instagram: settings.instagram || '', address: settings.address || '', working_hours: settings.working_hours || '',
+});
 }
+}, [settings]);
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+useEffect(() => {
+const hero = getHeroContent();
+    if (hero) {
+      setHeroForm({
+        title: hero.title,
+        subtitle: hero.subtitle,
+        description: hero.description,
+      });
+    }
+  }, [siteContent, getHeroContent]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (hero) setHeroForm({ title: hero.title, subtitle: hero.subtitle, description: hero.description, image_url: hero.image_url || '' });
+const about = getAboutContent();
+    if (about) {
+      setAboutForm({
+        title: about.title,
+        subtitle: about.subtitle,
+        description: about.description,
+      });
+    }
+  }, [siteContent, getAboutContent]);
 
-  if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
-  return children ? <>{children}</> : <Outlet />;
-};
+  useEffect(() => {
+    if (about) setAboutForm({ title: about.title, subtitle: about.subtitle, description: about.description });
+const services = getServicesContent();
+    if (services) {
+      setServicesForm({
+        title: services.title,
+        subtitle: services.subtitle,
+        description: services.description,
+      });
+    }
+  }, [siteContent, getServicesContent]);
 
-// =============================================================================
-// АНІМАЦІЯ ПЕРЕХОДІВ
-// =============================================================================
-const PageTransition: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const location = useLocation();
-  return (
-    <div key={location.pathname} style={{ animation: 'fadeSlideUp 0.6s ease-out forwards' }} className="w-full">
-      <style>{`
-        @keyframes fadeSlideUp {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-      {children}
-    </div>
-  );
-};
+  useEffect(() => {
+    if (services) setServicesForm({ title: services.title, subtitle: services.subtitle, description: services.description });
+const contact = getContactContent();
+    if (contact) {
+      setContactForm({
+        title: contact.title,
+        subtitle: contact.subtitle,
+        description: contact.description,
+      });
+    }
+  }, [siteContent, getContactContent]);
 
-// =============================================================================
-// СТОРІНКИ САЙТУ
-// =============================================================================
+  useEffect(() => {
+    if (contact) setContactForm({ title: contact.title, subtitle: contact.subtitle, description: contact.description });
+const testimonials = getTestimonialsContent();
+    if (testimonials) {
+      setTestimonialsForm({
+        title: testimonials.title,
+        subtitle: testimonials.subtitle,
+        description: testimonials.description,
+      });
+    }
+  }, [siteContent, getTestimonialsContent]);
+    if (testimonials) setTestimonialsForm({ title: testimonials.title, subtitle: testimonials.subtitle, description: testimonials.description });
+  }, [siteContent, getHeroContent, getAboutContent, getServicesContent, getContactContent, getTestimonialsContent]);
 
-// 1. Головна
-const HomePage: React.FC = () => {
-  const { getAboutContent } = useContent();
-  const aboutData = getAboutContent();
-
-  return (
-    <PageTransition>
-      <HeroSection />
-      <section className="min-h-screen bg-slate-950 flex items-center justify-center py-20">
-        <div className="text-center max-w-4xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-white mb-4">{aboutData?.title || 'Про нас'}</h2>
-          <p className="text-slate-400 whitespace-pre-wrap">{aboutData?.description || 'Завантаження опису...'}</p>
-        </div>
-      </section>
-    </PageTransition>
-  );
-};
-
-// 2. Послуги (Розумна сторінка)
-const ServicesPage: React.FC = () => {
-  const { getServicesContent } = useContent();
-  const servicesData = getServicesContent();
-  const [servicesList, setServicesList] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const fetchServices = async () => {
-      const { data } = await supabase.from('services_items').select('*').order('created_at', { ascending: true });
-      if (data) setServicesList(data);
-      setLoading(false);
-    };
-    fetchServices();
-  }, []);
-
-  return (
-    <PageTransition>
-      <section className="min-h-screen bg-slate-900 flex flex-col items-center py-32">
-        <div className="text-center max-w-6xl mx-auto px-4 w-full">
-          <h1 className="text-4xl font-bold text-white mb-4 text-rose-500">{servicesData?.title || 'Наші послуги'}</h1>
-          <p className="text-slate-400 mb-12 max-w-2xl mx-auto">{servicesData?.description || 'Опис послуг завантажується...'}</p>
-
-          {loading ? (
-            <div className="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          ) : servicesList.length === 0 ? (
-            <p className="text-slate-500 bg-slate-800/20 p-8 rounded-2xl border border-slate-800">Послуги скоро з'являться!</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {servicesList.map(service => (
-                <div key={service.id} className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-left hover:border-rose-500/50 transition-colors group">
-                  <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center mb-4 group-hover:bg-rose-500 group-hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">{service.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{service.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </PageTransition>
-  );
-};
-
-// 3. Галерея 
-const GalleryPage: React.FC = () => {
-  const [images, setImages] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
+  // ---------------------------------------------------------------------------
+  // HANDLERS
+  // ---------------------------------------------------------------------------
+  // Завантаження фотографій галереї при відкритті адмінки
+  useEffect(() => {
     const fetchGallery = async () => {
       const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-      if (data) setImages(data);
-      setLoading(false);
+      if (data) setGalleryImages(data);
     };
-    fetchGallery();
-  }, []);
+    if (isAuthenticated) fetchGallery();
+  }, [isAuthenticated]);
 
-  return (
-    <PageTransition>
-      <section className="min-h-screen bg-slate-950 flex flex-col items-center py-32">
-        <div className="text-center max-w-6xl mx-auto px-4 w-full">
-          <h1 className="text-4xl font-bold text-white mb-4 text-purple-500">Галерея робіт</h1>
-          <p className="text-slate-400 mb-12">Результати нашої роботи до та після</p>
+const handleSignOut = async () => {
+try {
+@@ -206,128 +119,27 @@ const ContentEditor: React.FC = () => {
+}
+};
 
-          {loading ? (
-            <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          ) : images.length === 0 ? (
-            <p className="text-slate-500 bg-slate-900/50 p-8 rounded-2xl border border-slate-800">Галерея поки що порожня.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {images.map((img) => (
-                <div key={img.id} className="relative group overflow-hidden rounded-2xl aspect-square bg-slate-800">
-                  <img src={img.image_url} alt="Робота" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                    <span className="text-white font-medium text-lg border-b border-purple-500 pb-1">{img.title || 'До та Після'}</span>
-                  </div>
+  const handleSaveSettings = async () => {
+    try {
+      await updateSettings(settingsForm);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      // Error is already handled in updateSettings
+      console.error('Settings save failed:', err);
+    }
+  };
+
+  const handleSaveHero = async () => {
+    try {
+      await updateContent('hero', heroForm);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      console.error('Hero save failed:', err);
+    }
+  };
+
+  const handleSaveAbout = async () => {
+    try {
+      await updateContent('about', aboutForm);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      console.error('About save failed:', err);
+    }
+  };
+
+  const handleSaveServices = async () => {
+    try {
+      await updateContent('services', servicesForm);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      console.error('Services save failed:', err);
+    }
+  };
+
+  const handleSaveContact = async () => {
+    try {
+      await updateContent('contact', contactForm);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      console.error('Contact save failed:', err);
+    }
+  };
+
+  const handleSaveTestimonials = async () => {
+    try {
+      await updateContent('testimonials', testimonialsForm);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      console.error('Testimonials save failed:', err);
+    }
+  };
+
+  const handleRefresh = async () => {
+    await refreshContent();
+    setHasUnsavedChanges(false);
+  };
+
+  // ---------------------------------------------------------------------------
+  // FORM CHANGE HANDLERS
+  // ---------------------------------------------------------------------------
+
+  const handleSettingsChange = (field: string, value: string) => {
+    setSettingsForm((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleHeroChange = (field: string, value: string) => {
+    setHeroForm((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleAboutChange = (field: string, value: string) => {
+    setAboutForm((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleServicesChange = (field: string, value: string) => {
+    setServicesForm((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleContactChange = (field: string, value: string) => {
+    setContactForm((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleTestimonialsChange = (field: string, value: string) => {
+    setTestimonialsForm((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  // ---------------------------------------------------------------------------
+  // RENDER HELPERS
+  // ---------------------------------------------------------------------------
+  const handleSaveSettings = async () => { try { await updateSettings(settingsForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleSaveHero = async () => { try { await updateContent('hero', heroForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleSaveAbout = async () => { try { await updateContent('about', aboutForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleSaveServices = async () => { try { await updateContent('services', servicesForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleSaveContact = async () => { try { await updateContent('contact', contactForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleSaveTestimonials = async () => { try { await updateContent('testimonials', testimonialsForm); setHasUnsavedChanges(false); } catch (err) {} };
+  const handleRefresh = async () => { await refreshContent(); setHasUnsavedChanges(false); };
+
+  const handleSettingsChange = (field: string, value: string) => { setSettingsForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
+  const handleHeroChange = (field: string, value: string) => { setHeroForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
+  const handleAboutChange = (field: string, value: string) => { setAboutForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
+  const handleServicesChange = (field: string, value: string) => { setServicesForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
+  const handleContactChange = (field: string, value: string) => { setContactForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
+  const handleTestimonialsChange = (field: string, value: string) => { setTestimonialsForm(prev => ({ ...prev, [field]: value })); setHasUnsavedChanges(true); };
+
+const renderSaveButton = (onSave: () => void) => (
+    <Button
+      onClick={onSave}
+      disabled={isSaving}
+      className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white"
+    >
+      {isSaving ? (
+        <>
+          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+          Saving...
+        </>
+      ) : (
+        <>
+          <Save className="w-4 h-4 mr-2" />
+          Save Changes
+        </>
+      )}
+    <Button onClick={onSave} disabled={isSaving} className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white">
+      {isSaving ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
+</Button>
+);
+
+  // ---------------------------------------------------------------------------
+  // LOADING STATE
+  // ---------------------------------------------------------------------------
+
+if (authLoading || contentLoading) {
+return (
+<div className="min-h-screen bg-slate-950 flex items-center justify-center">
+@@ -339,551 +151,267 @@ const ContentEditor: React.FC = () => {
+);
+}
+
+  // ---------------------------------------------------------------------------
+  // MAIN RENDER
+  // ---------------------------------------------------------------------------
+
+return (
+<div className="min-h-screen bg-slate-950">
+      {/* Header */}
+<header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div className="flex items-center justify-between h-16">
+            {/* Logo */}
+<div className="flex items-center gap-3">
+<div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-purple-600 rounded-xl flex items-center justify-center">
+<Sparkles className="w-5 h-5 text-white" />
+</div>
+<div>
+                <h1 className="text-lg font-bold text-white">
+                  Aura Cosmetology
+                </h1>
+                <h1 className="text-lg font-bold text-white">Aura Cosmetology</h1>
+<p className="text-xs text-slate-400">Admin Dashboard</p>
+</div>
+</div>
+
+            {/* Actions */}
+<div className="flex items-center gap-3">
+{hasUnsavedChanges && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500/50 text-amber-400"
+                >
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Unsaved Changes
+                <Badge variant="outline" className="border-amber-500/50 text-amber-400">
+                  <AlertCircle className="w-3 h-3 mr-1" /> Unsaved Changes
+</Badge>
+)}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isSaving}
+                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isSaving} className="border-slate-700 text-slate-300 hover:bg-slate-800">
+                <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+</Button>
+
+<a href="/" target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                >
+                  <Layout className="w-4 h-4 mr-2" />
+                  View Site
+                <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:bg-slate-800">
+                  <Layout className="w-4 h-4 mr-2" /> View Site
+</Button>
+</a>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-slate-400 hover:text-white hover:bg-slate-800">
+                <LogOut className="w-4 h-4 mr-2" /> Sign Out
+</Button>
+</div>
+</div>
+</div>
+</header>
+
+      {/* Main Content */}
+<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Error Alert */}
+{error && (
+<Alert className="mb-6 bg-red-500/10 border-red-500/30 text-red-400">
+<AlertCircle className="w-4 h-4" />
+<AlertDescription>{error}</AlertDescription>
+</Alert>
+)}
+
+        {/* Welcome Banner */}
+<div className="mb-8 p-6 bg-gradient-to-r from-rose-500/10 to-purple-600/10 rounded-2xl border border-rose-500/20">
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Welcome back, {user?.email?.split('@')[0] || 'Admin'}!
+          </h2>
+          <p className="text-slate-400">
+            Manage your website content below. Changes are saved directly to the
+            database and will be visible on the live site immediately.
+          </p>
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome back, {user?.email?.split('@')[0] || 'Admin'}!</h2>
+          <p className="text-slate-400">Manage your website content below. Changes are saved directly to the database.</p>
+</div>
+
+        {/* Content Tabs */}
+<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+<TabsList className="bg-slate-900 border border-slate-800 p-1 flex flex-wrap h-auto gap-1">
+            <TabsTrigger
+              value="hero"
+              className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Hero
+            </TabsTrigger>
+            <TabsTrigger
+              value="about"
+              className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"
+            >
+              <Type className="w-4 h-4 mr-2" />
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="services"
+              className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"
+            >
+              <Layout className="w-4 h-4 mr-2" />
+              Services
+            </TabsTrigger>
+            <TabsTrigger
+              value="testimonials"
+              className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Testimonials
+            </TabsTrigger>
+            <TabsTrigger
+              value="contact"
+              className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Contact
+            </TabsTrigger>
+            <TabsTrigger
+              value="settings"
+              className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
+            <TabsTrigger value="hero" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Sparkles className="w-4 h-4 mr-2" /> Hero</TabsTrigger>
+            <TabsTrigger value="gallery" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"><ImageIcon className="w-4 h-4 mr-2" /> Галерея</TabsTrigger>
+            <TabsTrigger value="about" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Type className="w-4 h-4 mr-2" /> About</TabsTrigger>
+            <TabsTrigger value="services" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Layout className="w-4 h-4 mr-2" /> Services</TabsTrigger>
+            <TabsTrigger value="testimonials" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><FileText className="w-4 h-4 mr-2" /> Відгуки</TabsTrigger>
+            <TabsTrigger value="contact" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Mail className="w-4 h-4 mr-2" /> Contact</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-rose-500 data-[state=active]:text-white"><Settings className="w-4 h-4 mr-2" /> Settings</TabsTrigger>
+</TabsList>
+
+          {/* HERO TAB */}
+          <TabsContent value="hero">
+          {/* НОВА ВКАЛДКА: ГАЛЕРЕЯ */}
+          <TabsContent value="gallery">
+<Card className="bg-slate-900 border-slate-800">
+<CardHeader>
+<CardTitle className="text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-rose-500" />
+                  Hero Section
+                  <ImageIcon className="w-5 h-5 text-purple-500" />
+                  Галерея робіт
+</CardTitle>
+<CardDescription className="text-slate-400">
+                  Edit the main hero section content displayed on the homepage.
+                  Завантажуйте фотографії. Вони автоматично з'являться на сторінці "Галерея" на сайті.
+</CardDescription>
+</CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Subtitle</Label>
+                  <Input
+                    value={heroForm.subtitle}
+                    onChange={(e) =>
+                      handleHeroChange('subtitle', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white"
+                    placeholder="e.g., Premium Aesthetic Medicine"
+                  />
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </PageTransition>
-  );
-};
-
-// 4. Прайс-лист (Розумна сторінка - ВИПРАВЛЕНО TS)
-const PricingPage: React.FC = () => {
-  const [pricingList, setPricingList] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const fetchPricing = async () => {
-      const { data } = await supabase.from('pricing_items').select('*').order('created_at', { ascending: true });
-      if (data) setPricingList(data);
-      setLoading(false);
-    };
-    fetchPricing();
-  }, []);
-
-  // Групуємо ціни по категоріях
-  const groupedPricing = pricingList.reduce((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = [];
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, any[]>);
-
-  return (
-    <PageTransition>
-      <section className="min-h-screen bg-slate-900 flex flex-col items-center py-32">
-        <div className="max-w-4xl mx-auto px-4 w-full">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl font-bold text-white mb-4 text-amber-500">Прайс-лист</h1>
-            <p className="text-slate-400">Прозорі ціни на всі процедури</p>
-          </div>
-
-          {loading ? (
-            <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          ) : pricingList.length === 0 ? (
-            <p className="text-slate-500 text-center bg-slate-800/20 p-8 rounded-2xl border border-slate-800">Прайс скоро з'явиться!</p>
-          ) : (
-            <div className="space-y-12">
-              {Object.entries(groupedPricing).map(([category, items]) => (
-                <div key={category} className="bg-slate-800/30 border border-slate-700 rounded-2xl overflow-hidden">
-                  <div className="bg-slate-800 p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-amber-500">{category}</h2>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Main Title</Label>
+                  <Input
+                    value={heroForm.title}
+                    onChange={(e) => handleHeroChange('title', e.target.value)}
+                    className="bg-slate-800 border-slate-700 text-white text-lg"
+                    placeholder="e.g., Reveal Your Natural Beauty"
+                  />
+              <CardContent className="space-y-8">
+                
+                {/* Блок завантаження */}
+                <div className="p-8 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/30 flex flex-col items-center justify-center text-center hover:bg-slate-800/50 transition-colors">
+                  <Upload className="w-10 h-10 text-slate-400 mb-4" />
+                  <h3 className="text-xl font-medium text-white mb-2">Додати нове фото</h3>
+                  <p className="text-slate-400 mb-6">Виберіть файл з комп'ютера або телефону</p>
+                  
+                  <div className="relative inline-block">
+                    <Button disabled={isUploadingGallery} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg rounded-xl">
+                      {isUploadingGallery ? 'Завантаження...' : 'Вибрати фото'}
+                    </Button>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isUploadingGallery}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          setIsUploadingGallery(true);
+                          const loadingToast = toast.loading('Завантажуємо фото у хмару...');
+                          const imageUrl = await uploadImage(file);
+                          
+                          const { error } = await supabase.from('gallery').insert([{ image_url: imageUrl, title: 'Робота до/після' }]);
+                          if (error) throw error;
+                          
+                          const { data } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
+                          if (data) setGalleryImages(data);
+                          
+                          toast.dismiss(loadingToast);
+                          toast.success('Фото успішно додано в галерею!');
+                        } catch (error: any) {
+                          toast.error(`Помилка: ${error.message}`);
+                        } finally {
+                          setIsUploadingGallery(false);
+                          e.target.value = '';
+                        }
+                      }}
+                    />
                   </div>
-                  <div className="divide-y divide-slate-700/50">
-                    {/* Ось тут додано явні типи для items та item */}
-                    {(items as any[]).map((item: any) => (
-                      <div key={item.id} className="flex justify-between items-center p-4 hover:bg-slate-800/50 transition-colors">
-                        <span className="text-slate-300 font-medium">{item.name}</span>
-                        <span className="text-white font-bold bg-slate-900 px-4 py-1 rounded-full border border-slate-700">{item.price}</span>
-                      </div>
-                    ))}
-                  </div>
+</div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Description</Label>
+                  <Textarea
+                    value={heroForm.description}
+                    onChange={(e) =>
+                      handleHeroChange('description', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white min-h-[120px]"
+                    placeholder="Enter hero section description..."
+                  />
+
+                <Separator className="bg-slate-800" />
+
+                {/* Сітка завантажених фотографій */}
+                <div>
+                  <h3 className="text-xl font-medium text-white mb-6">Завантажені фотографії ({galleryImages.length})</h3>
+                  {galleryImages.length === 0 ? (
+                    <p className="text-slate-500 text-center py-8">Тут поки порожньо.</p>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {galleryImages.map((img) => (
+                        <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-800 aspect-square">
+                          <img src={img.image_url} alt="Gallery item" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={async () => {
+                                if (!window.confirm('Ви впевнені, що хочете видалити це фото з сайту?')) return;
+                                try {
+                                  const { error } = await supabase.from('gallery').delete().eq('id', img.id);
+                                  if (error) throw error;
+                                  setGalleryImages(prev => prev.filter(p => p.id !== img.id));
+                                  toast.success('Фото видалено');
+                                } catch (err) {
+                                  toast.error('Помилка видалення');
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" /> Видалити
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+</div>
+                {/* НОВИЙ БЛОК ДЛЯ ФОТО */}
+
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* HERO TAB */}
+          <TabsContent value="hero">
+            <Card className="bg-slate-900 border-slate-800">
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Sparkles className="w-5 h-5 text-rose-500" /> Hero Section</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={heroForm.subtitle} onChange={(e) => handleHeroChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={heroForm.title} onChange={(e) => handleHeroChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={heroForm.description} onChange={(e) => handleHeroChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
+                
+<div className="space-y-2 pt-4 border-t border-slate-800">
+                  <Label className="text-slate-300 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    Hero Image
+                  </Label>
+                  <Label className="text-slate-300 flex items-center gap-2"><Sparkles className="w-4 h-4" /> Головне фото (Hero Image)</Label>
+<div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                    <Input type="file" accept="image/*" className="bg-slate-800 border-slate-700 text-slate-300 file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-1 file:mr-4 hover:file:bg-slate-600 cursor-pointer"
+onChange={async (e) => {
+const file = e.target.files?.[0];
+if (!file) return;
+                        
+try {
+const loadingToast = toast.loading('Uploading image...');
+const imageUrl = await uploadImage(file);
+handleHeroChange('image_url', imageUrl);
+toast.dismiss(loadingToast);
+toast.success('Image uploaded! Click Save Changes to apply.');
+                        } catch (error: any) {
+  toast.error(`Помилка: ${error.message || 'Не вдалося завантажити'}`);
+}
+
+                        } catch (error) { toast.error('Failed to upload image'); }
+}}
+                      className="bg-slate-800 border-slate-700 text-slate-300 file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-1 file:mr-4 hover:file:bg-slate-600 cursor-pointer"
+/>
+</div>
+                  {/* Показуємо попередній перегляд, якщо фото вже є */}
+                  {(heroForm as any).image_url && (
+                  {heroForm.image_url && (
+<div className="mt-4 relative w-40 h-40 rounded-xl overflow-hidden border border-slate-700">
+                      <img 
+                        src={(heroForm as any).image_url} 
+                        alt="Hero preview" 
+                        className="object-cover w-full h-full"
+                      />
+                      <img src={heroForm.image_url} alt="Hero preview" className="object-cover w-full h-full" />
+</div>
+)}
+</div>
+                <div className="flex justify-end">
+                  {renderSaveButton(handleSaveHero)}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </PageTransition>
-  );
-};
+                <div className="flex justify-end">{renderSaveButton(handleSaveHero)}</div>
+</CardContent>
+</Card>
+</TabsContent>
 
-// 5. Контакти
-const ContactPage: React.FC = () => {
-  const { getContactContent, settings } = useContent();
-  const contactData = getContactContent();
+{/* ABOUT TAB */}
+<TabsContent value="about">
+<Card className="bg-slate-900 border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Type className="w-5 h-5 text-rose-500" />
+                  About Section
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Edit the about section content.
+                </CardDescription>
+              </CardHeader>
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Type className="w-5 h-5 text-rose-500" /> About Section</CardTitle></CardHeader>
+<CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Subtitle</Label>
+                  <Input
+                    value={aboutForm.subtitle}
+                    onChange={(e) =>
+                      handleAboutChange('subtitle', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white"
+                    placeholder="e.g., About Aura Cosmetology"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Main Title</Label>
+                  <Input
+                    value={aboutForm.title}
+                    onChange={(e) =>
+                      handleAboutChange('title', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white text-lg"
+                    placeholder="e.g., Where Science Meets Artistry"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Description</Label>
+                  <Textarea
+                    value={aboutForm.description}
+                    onChange={(e) =>
+                      handleAboutChange('description', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white min-h-[200px]"
+                    placeholder="Enter about section description..."
+                  />
+                </div>
+                <div className="flex justify-end">
+                  {renderSaveButton(handleSaveAbout)}
+                </div>
+                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={aboutForm.subtitle} onChange={(e) => handleAboutChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={aboutForm.title} onChange={(e) => handleAboutChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={aboutForm.description} onChange={(e) => handleAboutChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[200px]" /></div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveAbout)}</div>
+</CardContent>
+</Card>
+</TabsContent>
 
-  return (
-    <PageTransition>
-      <section className="min-h-screen bg-slate-950 flex flex-col items-center py-32">
-        <div className="max-w-4xl w-full mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4 text-blue-500">{contactData?.title || 'Контакти'}</h1>
-          <p className="text-slate-400 mb-12">{contactData?.description || 'Зв’яжіться з нами зручним для вас способом'}</p>
+{/* SERVICES TAB */}
+<TabsContent value="services">
+<Card className="bg-slate-900 border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Layout className="w-5 h-5 text-rose-500" />
+                  Services Section
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Edit the services section content.
+                </CardDescription>
+              </CardHeader>
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Layout className="w-5 h-5 text-rose-500" /> Services Section</CardTitle></CardHeader>
+<CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Subtitle</Label>
+                  <Input
+                    value={servicesForm.subtitle}
+                    onChange={(e) =>
+                      handleServicesChange('subtitle', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white"
+                    placeholder="e.g., Premium Services"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Main Title</Label>
+                  <Input
+                    value={servicesForm.title}
+                    onChange={(e) =>
+                      handleServicesChange('title', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white text-lg"
+                    placeholder="e.g., Our Signature Treatments"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Description</Label>
+                  <Textarea
+                    value={servicesForm.description}
+                    onChange={(e) =>
+                      handleServicesChange('description', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white min-h-[120px]"
+                    placeholder="Enter services section description..."
+                  />
+                </div>
+                <div className="flex justify-end">
+                  {renderSaveButton(handleSaveServices)}
+                </div>
+                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={servicesForm.subtitle} onChange={(e) => handleServicesChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={servicesForm.title} onChange={(e) => handleServicesChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={servicesForm.description} onChange={(e) => handleServicesChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveServices)}</div>
+</CardContent>
+</Card>
+</TabsContent>
 
-          <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 max-w-lg mx-auto text-left backdrop-blur-sm">
-            <div className="space-y-6 text-slate-300 text-lg">
-              {settings?.phone && <p className="flex items-center gap-4">📞 <a href={`tel:${settings.phone}`} className="hover:text-rose-400 transition-colors">{settings.phone}</a></p>}
-              {settings?.email && <p className="flex items-center gap-4">✉️ <a href={`mailto:${settings.email}`} className="hover:text-rose-400 transition-colors">{settings.email}</a></p>}
-              {settings?.instagram && <p className="flex items-center gap-4">📸 <a href={settings.instagram.includes('http') ? settings.instagram : `https://instagram.com/${settings.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-rose-400 transition-colors">{settings.instagram}</a></p>}
-              {settings?.address && <p className="flex items-center gap-4">📍 <span>{settings.address}</span></p>}
-              {settings?.working_hours && <p className="flex items-center gap-4">🕒 <span>{settings.working_hours}</span></p>}
-            </div>
-          </div>
-        </div>
-      </section>
-    </PageTransition>
-  );
-};
+{/* TESTIMONIALS TAB */}
+<TabsContent value="testimonials">
+<Card className="bg-slate-900 border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-rose-500" />
+                  Testimonials Section
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Edit the testimonials section content.
+                </CardDescription>
+              </CardHeader>
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><FileText className="w-5 h-5 text-rose-500" /> Testimonials Section</CardTitle></CardHeader>
+<CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Subtitle</Label>
+                  <Input
+                    value={testimonialsForm.subtitle}
+                    onChange={(e) =>
+                      handleTestimonialsChange('subtitle', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white"
+                    placeholder="e.g., Client Stories"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Main Title</Label>
+                  <Input
+                    value={testimonialsForm.title}
+                    onChange={(e) =>
+                      handleTestimonialsChange('title', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white text-lg"
+                    placeholder="e.g., What Our Clients Say"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Description</Label>
+                  <Textarea
+                    value={testimonialsForm.description}
+                    onChange={(e) =>
+                      handleTestimonialsChange('description', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white min-h-[120px]"
+                    placeholder="Enter testimonials section description..."
+                  />
+                </div>
+                <div className="flex justify-end">
+                  {renderSaveButton(handleSaveTestimonials)}
+                </div>
+                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={testimonialsForm.subtitle} onChange={(e) => handleTestimonialsChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={testimonialsForm.title} onChange={(e) => handleTestimonialsChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={testimonialsForm.description} onChange={(e) => handleTestimonialsChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveTestimonials)}</div>
+</CardContent>
+</Card>
+</TabsContent>
 
-// =============================================================================
-// ГОЛОВНИЙ ШАБЛОН
-// =============================================================================
+{/* CONTACT TAB */}
+<TabsContent value="contact">
+<Card className="bg-slate-900 border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-rose-500" />
+                  Contact Section
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Edit the contact section content.
+                </CardDescription>
+              </CardHeader>
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Mail className="w-5 h-5 text-rose-500" /> Contact Section</CardTitle></CardHeader>
+<CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Subtitle</Label>
+                  <Input
+                    value={contactForm.subtitle}
+                    onChange={(e) =>
+                      handleContactChange('subtitle', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white"
+                    placeholder="e.g., Get In Touch"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Main Title</Label>
+                  <Input
+                    value={contactForm.title}
+                    onChange={(e) =>
+                      handleContactChange('title', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white text-lg"
+                    placeholder="e.g., Begin Your Transformation"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Description</Label>
+                  <Textarea
+                    value={contactForm.description}
+                    onChange={(e) =>
+                      handleContactChange('description', e.target.value)
+                    }
+                    className="bg-slate-800 border-slate-700 text-white min-h-[120px]"
+                    placeholder="Enter contact section description..."
+                  />
+                </div>
+                <div className="flex justify-end">
+                  {renderSaveButton(handleSaveContact)}
+                </div>
+                <div className="space-y-2"><Label className="text-slate-300">Subtitle</Label><Input value={contactForm.subtitle} onChange={(e) => handleContactChange('subtitle', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Main Title</Label><Input value={contactForm.title} onChange={(e) => handleContactChange('title', e.target.value)} className="bg-slate-800 border-slate-700 text-white text-lg" /></div>
+                <div className="space-y-2"><Label className="text-slate-300">Description</Label><Textarea value={contactForm.description} onChange={(e) => handleContactChange('description', e.target.value)} className="bg-slate-800 border-slate-700 text-white min-h-[120px]" /></div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveContact)}</div>
+</CardContent>
+</Card>
+</TabsContent>
 
-const PublicLayout: React.FC = () => {
-  const { settings } = useContent();
+{/* SETTINGS TAB */}
+<TabsContent value="settings">
+<Card className="bg-slate-900 border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-rose-500" />
+                  Clinic Settings
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Manage your clinic information and contact details.
+                </CardDescription>
+              </CardHeader>
+              <CardHeader><CardTitle className="text-white flex items-center gap-2"><Settings className="w-5 h-5 text-rose-500" /> Clinic Settings</CardTitle></CardHeader>
+<CardContent className="space-y-6">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-slate-300 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Clinic Name
+                    </Label>
+                    <Input
+                      value={settingsForm.clinic_name}
+                      onChange={(e) =>
+                        handleSettingsChange('clinic_name', e.target.value)
+                      }
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
 
-  return (
-    <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-x-hidden">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <span className="text-white font-semibold hidden sm:block">Aura Cosmetology</span>
-            </Link>
+                  <div className="space-y-2">
+                    <Label className="text-slate-300 flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Phone Number
+                    </Label>
+                    <Input
+                      value={settingsForm.phone}
+                      onChange={(e) =>
+                        handleSettingsChange('phone', e.target.value)
+                      }
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
 
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Головна</Link>
-              <Link to="/services" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Послуги</Link>
-              <Link to="/pricing" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Прайс</Link>
-              <Link to="/gallery" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Галерея</Link>
-              <Link to="/contact" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">Контакти</Link>
-            </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-300 flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Email Address
+                    </Label>
+                    <Input
+                      value={settingsForm.email}
+                      onChange={(e) =>
+                        handleSettingsChange('email', e.target.value)
+                      }
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
 
-            <a href={`tel:${settings?.phone || '+38000000000'}`} className="px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-rose-500/25 transition-all flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-              Подзвонити
-            </a>
-          </div>
-        </div>
-      </nav>
+                  <div className="space-y-2">
+                    <Label className="text-slate-300 flex items-center gap-2">
+                      <Instagram className="w-4 h-4" />
+                      Instagram
+                    </Label>
+                    <Input
+                      value={settingsForm.instagram}
+                      onChange={(e) =>
+                        handleSettingsChange('instagram', e.target.value)
+                      }
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
 
-      <main className="flex-grow pt-16">
-        <Outlet />
-      </main>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-slate-300 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Address
+                    </Label>
+                    <Input
+                      value={settingsForm.address}
+                      onChange={(e) =>
+                        handleSettingsChange('address', e.target.value)
+                      }
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
 
-      <footer className="bg-slate-950 border-t border-slate-800 py-12 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <span className="text-white font-semibold">Aura Cosmetology</span>
-            </div>
-            <p className="text-slate-500 text-sm">© 2024 Aura Cosmetology. All rights reserved.</p>
-            <Link to="/admin/login" className="text-slate-500 hover:text-rose-400 text-sm transition-colors">Admin Login</Link>
-          </div>
-        </div>
-      </footer>
-      
-      <a href={settings?.instagram?.includes('http') ? settings.instagram : `https://instagram.com/${settings?.instagram?.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-tr from-yellow-400 via-rose-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(225,29,72,0.5)] hover:scale-110 transition-transform z-50">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-      </a>
-    </div>
-  );
-};
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-slate-300 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Working Hours
+                    </Label>
+                    <Input
+                      value={settingsForm.working_hours}
+                      onChange={(e) =>
+                        handleSettingsChange('working_hours', e.target.value)
+                      }
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Sparkles className="w-4 h-4" /> Clinic Name</Label><Input value={settingsForm.clinic_name} onChange={(e) => handleSettingsChange('clinic_name', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Phone className="w-4 h-4" /> Phone Number</Label><Input value={settingsForm.phone} onChange={(e) => handleSettingsChange('phone', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Mail className="w-4 h-4" /> Email Address</Label><Input value={settingsForm.email} onChange={(e) => handleSettingsChange('email', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                  <div className="space-y-2"><Label className="text-slate-300 flex items-center gap-2"><Instagram className="w-4 h-4" /> Instagram</Label><Input value={settingsForm.instagram} onChange={(e) => handleSettingsChange('instagram', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                  <div className="space-y-2 md:col-span-2"><Label className="text-slate-300 flex items-center gap-2"><MapPin className="w-4 h-4" /> Address</Label><Input value={settingsForm.address} onChange={(e) => handleSettingsChange('address', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+                  <div className="space-y-2 md:col-span-2"><Label className="text-slate-300 flex items-center gap-2"><Clock className="w-4 h-4" /> Working Hours</Label><Input value={settingsForm.working_hours} onChange={(e) => handleSettingsChange('working_hours', e.target.value)} className="bg-slate-800 border-slate-700 text-white" /></div>
+</div>
 
-// =============================================================================
-// МАРШРУТИЗАЦІЯ
-// =============================================================================
+<Separator className="bg-slate-800" />
 
-const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <ContentProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<PublicLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="services" element={<ServicesPage />} />
-              <Route path="pricing" element={<PricingPage />} />
-              <Route path="gallery" element={<GalleryPage />} />
-              <Route path="contact" element={<ContactPage />} />
-            </Route>
-
-            <Route path="/admin" element={<div className="min-h-screen bg-slate-950"><Outlet /></div>}>
-              <Route path="login" element={<AdminLogin />} />
-              <Route path="dashboard" element={<ProtectedRoute><ContentEditor /></ProtectedRoute>} />
-              <Route index element={<Navigate to="login" replace />} />
-            </Route>
-
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Router>
-        <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#fff', border: '1px solid #334155' } }} />
-      </ContentProvider>
-    </AuthProvider>
-  );
-}; 
-
-export default App;
+                <div className="flex justify-end">
+                  {renderSaveButton(handleSaveSettings)}
+                </div>
+                <div className="flex justify-end">{renderSaveButton(handleSaveSettings)}</div>
+</CardContent>
+</Card>
+</TabsContent>
