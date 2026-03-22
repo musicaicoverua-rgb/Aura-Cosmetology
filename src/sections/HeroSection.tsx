@@ -3,6 +3,7 @@
 // ============================================================================
 
 import React, { useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- Додано для переходу по кнопках
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Calendar, Sparkles } from 'lucide-react';
@@ -13,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection: React.FC = () => {
+  const navigate = useNavigate(); // <-- Ініціалізуємо навігацію
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
@@ -24,14 +26,15 @@ const HeroSection: React.FC = () => {
   const imageRef = useRef<HTMLDivElement>(null);
   const decorRef = useRef<HTMLDivElement>(null);
 
-  // ОДНА ЗМІНА ТУТ: прибрали 'settings'
   const { getHeroContent, isLoading } = useContent();
   const heroContent = getHeroContent();
 
   const extraData = (heroContent?.extra_data as Record<string, unknown>) || {};
   const stats = (extraData.stats as Array<{ value: string; label: string }>) || [];
-  const ctaPrimary = (extraData.cta_primary as string) || 'Book Consultation';
-  const ctaSecondary = (extraData.cta_secondary as string) || 'Explore Services';
+  
+  // Змінюємо стандартний текст кнопок на український
+  const ctaPrimary = (extraData.cta_primary as string) || 'Записатись зараз';
+  const ctaSecondary = (extraData.cta_secondary as string) || 'Наші послуги';
 
   useLayoutEffect(() => {
     if (isLoading) return;
@@ -130,31 +133,44 @@ const HeroSection: React.FC = () => {
               <div ref={badgeRef}>
                 <Badge variant="outline" className="px-4 py-2 text-sm font-medium border-rose-500/30 bg-rose-500/10 text-rose-400 backdrop-blur-sm">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  {heroContent?.subtitle || 'Premium Aesthetic Medicine'}
+                  {heroContent?.subtitle || 'Косметологія преміум-класу'}
                 </Badge>
               </div>
 
               <h1 ref={titleRef} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
                 <span className="block bg-gradient-to-r from-rose-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
-                  {heroContent?.title || 'Мій Заголовок'}
+                  {heroContent?.title || 'Відкрийте свою природну красу'}
                 </span>
               </h1>
 
+              {/* ПЕРЕКЛАД ТЕКСТУ НА УКРАЇНСЬКУ */}
               <p ref={subtitleRef} className="text-xl sm:text-2xl text-slate-300 font-light">
-                Experience the art of beauty with our cutting-edge treatments
+                Відчуйте мистецтво краси за допомогою наших передових процедур
               </p>
 
               <p ref={descriptionRef} className="text-slate-400 text-lg max-w-xl leading-relaxed">
-                {heroContent?.description || 'Our expert team combines medical precision with artistic vision to enhance your natural glow.'}
+                {heroContent?.description || 'Наша команда поєднує медичну точність із художнім баченням, щоб підкреслити ваше природне сяйво.'}
               </p>
 
               <div ref={ctaRef} className="flex flex-wrap gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-semibold px-8 py-6 text-lg shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40 transition-all duration-300 group">
+                {/* РОЖЕВА КНОПКА: ТЕПЕР ВЕДЕ НА КОНТАКТИ */}
+                <Button 
+                  onClick={() => navigate('/contact')} 
+                  size="lg" 
+                  className="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-semibold px-8 py-6 text-lg shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40 transition-all duration-300 group"
+                >
                   <Calendar className="w-5 h-5 mr-2" />
                   {ctaPrimary}
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button variant="outline" size="lg" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white px-8 py-6 text-lg transition-all duration-300">
+                
+                {/* БІЛА КНОПКА: ТЕПЕР ВЕДЕ НА ПОСЛУГИ */}
+                <Button 
+                  onClick={() => navigate('/services')} 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white px-8 py-6 text-lg transition-all duration-300"
+                >
                   {ctaSecondary}
                 </Button>
               </div>
@@ -171,15 +187,15 @@ const HeroSection: React.FC = () => {
                   <>
                     <div className="text-center sm:text-left">
                       <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">15+</div>
-                      <div className="text-sm text-slate-500 mt-1">Years Experience</div>
+                      <div className="text-sm text-slate-500 mt-1">Років досвіду</div>
                     </div>
                     <div className="text-center sm:text-left">
                       <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">10K+</div>
-                      <div className="text-sm text-slate-500 mt-1">Happy Clients</div>
+                      <div className="text-sm text-slate-500 mt-1">Щасливих клієнтів</div>
                     </div>
                     <div className="text-center sm:text-left">
                       <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">50+</div>
-                      <div className="text-sm text-slate-500 mt-1">Expert Treatments</div>
+                      <div className="text-sm text-slate-500 mt-1">Процедур</div>
                     </div>
                   </>
                 )}
