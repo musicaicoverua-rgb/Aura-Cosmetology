@@ -24,7 +24,8 @@ const HeroSection: React.FC = () => {
   const imageRef = useRef<HTMLDivElement>(null);
   const decorRef = useRef<HTMLDivElement>(null);
 
-  const { getHeroContent, settings, isLoading } = useContent();
+  // ОДНА ЗМІНА ТУТ: прибрали 'settings'
+  const { getHeroContent, isLoading } = useContent();
   const heroContent = getHeroContent();
 
   const extraData = (heroContent?.extra_data as Record<string, unknown>) || {};
@@ -125,7 +126,6 @@ const HeroSection: React.FC = () => {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-0">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             
-            {/* Left Column - Text Content */}
             <div className="order-2 lg:order-1 space-y-8">
               <div ref={badgeRef}>
                 <Badge variant="outline" className="px-4 py-2 text-sm font-medium border-rose-500/30 bg-rose-500/10 text-rose-400 backdrop-blur-sm">
@@ -186,7 +186,6 @@ const HeroSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column - Hero Image */}
             <div ref={imageRef} className="order-1 lg:order-2 relative">
               <div className="relative aspect-[4/5] lg:aspect-[3/4] rounded-3xl overflow-hidden border border-slate-700 shadow-2xl shadow-purple-500/10">
                 {heroContent?.image_url ? (
@@ -195,7 +194,6 @@ const HeroSection: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 via-purple-500/20 to-amber-500/20" />
                 )}
                 
-                {/* Floating badges on image */}
                 <div className="absolute top-8 right-8 px-4 py-2 bg-slate-900/60 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
                   <span className="text-white text-sm font-medium flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-400" /> Premium Care
@@ -203,7 +201,6 @@ const HeroSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Decorative rings behind image */}
               <div className="absolute -top-10 -right-10 w-40 h-40 border border-rose-500/20 rounded-full -z-10" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 border border-amber-500/20 rounded-full -z-10" />
             </div>
